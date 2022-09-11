@@ -1,0 +1,10 @@
+notion
+boardgamegeek2
+google-api-python-client
+pandas
+numpy
+requests
+google-auth-oauthlib
+google-auth-httplib2
+loguru
+tqdm
