@@ -1,7 +1,6 @@
 import pandas as pd
 import json
 import requests
-from boardgamegeek import BGGClient
 
 def upload_games():
     games = pd.read_csv('data/games.csv')

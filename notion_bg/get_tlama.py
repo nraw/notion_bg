@@ -1,5 +1,7 @@
 import requests
+from loguru import logger
 from bs4 import BeautifulSoup
+from boardgamegeek import BGGClient
 
 def get_tlama(bgg_name):
 

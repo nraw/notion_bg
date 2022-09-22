@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 from tqdm import tqdm
+from loguru import logger
 
 from notion_bg.get_bbb_games import clean_games
 

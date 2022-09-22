@@ -3,6 +3,12 @@ from bs4 import BeautifulSoup
 
 from notion_bg.get_notion_games import get_notion_games
 from notion_bg.get_bgg_data import get_bgg_data, check_bgg_id
+from notion_bg.get_bga_games import get_bga_games
+from notion_bg.get_bbb_games import get_bbb_games
+from notion_bg.get_svet_her import get_svet_her
+from notion_bg.get_tlama import get_tlama_showroom, get_tlama
+from notion_bg.get_youtube_urls import get_youtube_meta
+from notion_bg.update_notion_game import update_notion_game
 from notion_bg.config import conf
 from loguru import logger
 
@@ -12,7 +18,7 @@ def main():
 
     data = get_notion_games()
     selected_games = filter_games(data)
-    process_selected_games(selected_games, data, database_id, headers)
+    process_selected_games(selected_games, data)
     
 def filter_games(data):
     results = data['results'] 
@@ -36,7 +42,7 @@ def get_notion_name(game):
     return game_name
 
 
-def process_selected_games(selected_games, data, database_id, headers):
+def process_selected_games(selected_games, data):
     if 'In BGA' in conf['data_updates']:
         bga_games = get_bga_games()
     if 'In BBB' in conf['data_updates']:
@@ -80,3 +86,5 @@ def process_selected_games(selected_games, data, database_id, headers):
                 tlama_meta = tlama_meta)
         update_notion_game(new_id, new_game, game_meta)
 
+if __name__ == '__main__':
+    main()

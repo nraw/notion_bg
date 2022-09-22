@@ -1,6 +1,8 @@
 import requests
+import os
 
 def get_notion_games():
+    notion_token = os.environ['notion_token']
     database_id = "14a0eda608be4da284229fe06491ecb7"
     headers = {
         "Authorization": "Bearer " + notion_token,
