@@ -9,6 +9,7 @@ from notion_bg.config import conf
 def get_youtube_meta(bgg_name):
     api_service_name = "youtube"
     api_version = "v3"
+    google_api_key = os.environ['google_api_key']
 
     youtube = googleapiclient.discovery.build(
         api_service_name, api_version, developerKey = google_api_key)

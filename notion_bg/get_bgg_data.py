@@ -1,3 +1,6 @@
+import os
+import requests
+
 from boardgamegeek import BGGClient, BGGItemNotFoundError
 from loguru import logger
 from urllib.parse import quote
@@ -43,6 +46,7 @@ def check_bgg_id(new_id, new_game_data):
     return bgg_id
 
 def get_bgg_url(new_game):
+    wishlist_scanner_url = os.environ['wishlist_scanner_url']
     url = wishlist_scanner_url + "?barcode=" + quote(new_game)
     res = requests.get(url)
     bgg_url = res.text

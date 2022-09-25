@@ -4,7 +4,9 @@ google-api-python-client
 pandas
 numpy
 requests
+requests-cache==0.5.2
 google-auth-oauthlib
 google-auth-httplib2
 loguru
 tqdm
+lxml

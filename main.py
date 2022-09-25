@@ -34,6 +34,16 @@ def filter_games(data):
             new_id = result['id']
             #  new_game = get_notion_name(result)
             selected_games[new_id] = result
+        elif conf['games_filter'] == 'id':
+            if result['id'] == conf['notion_id']:
+                new_id = result['id']
+                #  new_game = get_notion_name(result)
+                selected_games[new_id] = result
+        elif conf['games_filter'] == 'bgg_id':
+            if result['properties']['bgg_id']['number'] == conf['bgg_id']:
+                new_id = result['id']
+                #  new_game = get_notion_name(result)
+                selected_games[new_id] = result
     logger.info(f"Filtered {len(selected_games)} games")
     return selected_games
 
@@ -43,14 +53,15 @@ def get_notion_name(game):
 
 
 def process_selected_games(selected_games, data):
-    if 'In BGA' in conf['data_updates']:
-        bga_games = get_bga_games()
-    if 'In BBB' in conf['data_updates']:
-        bbb_games = get_bbb_games()
-    if 'In Tlama Showroom' in conf['data_updates']:
-        tlama_showroom = get_tlama_showroom()
-    if 'In Svet Her' in conf['data_updates']:
-        svet_her_games = get_svet_her()
+    if selected_games:
+        if 'In BGA' in conf['data_updates']:
+            bga_games = get_bga_games()
+        if 'In BBB' in conf['data_updates']:
+            bbb_games = get_bbb_games()
+        if 'In Tlama Showroom' in conf['data_updates']:
+            tlama_showroom = get_tlama_showroom()
+        if 'In Svet Her' in conf['data_updates']:
+            svet_her_games = get_svet_her()
     for new_id, new_game_data in selected_games.items():
         new_game = get_notion_name(new_game_data)
         logger.info(f"Processing {new_game}")
@@ -75,7 +86,7 @@ def process_selected_games(selected_games, data):
         else:
             in_svet_her = None
         yt_meta = get_youtube_meta(bgg_name)
-        tlama_meta = get_tlama(bgg_name)
+        tlama_meta = get_tlama(bgg_name, new_game_data)
         game_meta = dict(
                 bgg_meta = bgg_meta,
                 in_bga = in_bga,

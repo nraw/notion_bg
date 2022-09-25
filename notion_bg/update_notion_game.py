@@ -1,8 +1,11 @@
 import os
 import requests
 from notion_bg.config import conf
+import json
+from loguru import logger
 
 def update_notion_game(new_id, new_game,  game_meta):
+    notion_token = os.environ['notion_token']
 
     headers = {
         'Authorization': f"Bearer {notion_token}",
@@ -42,9 +45,9 @@ def update_notion_game(new_id, new_game,  game_meta):
         properties['Youtube Dice Tower'] ={'url': yt_dt}
     if 'Tlama' in conf['data_updates']:
         tlama = get_hyperlink('tlama_meta', game_meta)
-        properties['Tlama'] ={'url': tlama}
-
-
+        if tlama:
+            properties['Tlama'] ={'url': tlama}
+            properties['Tlama Backup'] ={'url': tlama}
     json_data = {'properties':properties}
     response = requests.patch(f'https://api.notion.com/v1/pages/{new_id}', headers=headers, data=json.dumps(json_data))
     logger.info(response.json())
