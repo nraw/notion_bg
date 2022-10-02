@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
   repository_dispatch:
     types:
-      - webhook
+      - tlama
 jobs:
 
   update_tlama_all:

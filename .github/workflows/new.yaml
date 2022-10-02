@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
   repository_dispatch:
     types:
-      - webhook
+      - new
 jobs:
   update_new:
     runs-on: ubuntu-latest
