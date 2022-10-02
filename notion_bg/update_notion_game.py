@@ -53,13 +53,16 @@ def update_notion_game(new_id, new_game, game_meta):
         if tlama:
             properties["Tlama"] = {"url": tlama}
             properties["Tlama Backup"] = {"url": tlama}
-    json_data = {"properties": properties}
-    response = requests.patch(
-        f"https://api.notion.com/v1/pages/{new_id}",
-        headers=headers,
-        data=json.dumps(json_data),
-    )
-    logger.info(response.json())
+    if properties:
+        json_data = {"properties": properties}
+        response = requests.patch(
+            f"https://api.notion.com/v1/pages/{new_id}",
+            headers=headers,
+            data=json.dumps(json_data),
+        )
+        logger.info(response.json())
+    else:
+        logger.info("Nothing to update. Skipping")
 
 
 def get_hyperlink(yt_channel, game_meta, meta="yt_meta"):
