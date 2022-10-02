@@ -1,4 +1,6 @@
 import requests, json
+import fire
+#  import argh
 from bs4 import BeautifulSoup
 
 from notion_bg.get_notion_games import get_notion_games
@@ -12,9 +14,14 @@ from notion_bg.update_notion_game import update_notion_game
 from notion_bg.config import conf
 from loguru import logger
 
-def main():
-    logger.info(f"game_filter: {conf['games_filter']}")
-    logger.info(f"data_updates: {conf['data_updates']}")
+def main(games_filter:str = conf['games_filter'], data_updates:list = conf['data_updates'], bgg_id:int = conf['bgg_id']):
+    conf['games_filter'] = games_filter
+    conf['data_updates'] = data_updates
+    conf['bgg_id'] = bgg_id
+    logger.info(f"game_filter: {games_filter}")
+    logger.info(f"data_updates: {data_updates}")
+    if games_filter == 'bgg_id':
+        logger.info(f"data_updates: {bgg_id}")
 
     data = get_notion_games()
     selected_games = filter_games(data)
@@ -98,4 +105,5 @@ def process_selected_games(selected_games, data):
         update_notion_game(new_id, new_game, game_meta)
 
 if __name__ == '__main__':
-    main()
+    #  argh.dispatch_command(main)
+    fire.Fire(main)
