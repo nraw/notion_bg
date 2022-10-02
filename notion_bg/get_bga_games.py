@@ -2,11 +2,13 @@ import requests
 from bs4 import BeautifulSoup
 from loguru import logger
 
+
 def get_bga_games():
     logger.info("Obtaining BGA games")
     bga_geeklist_id = "252354"  # BGA
     bga_games = get_geeklist(bga_geeklist_id)
     return bga_games
+
 
 def get_geeklist(geeklist_id):
     geeklist_url = f"https://www.boardgamegeek.com/xmlapi/geeklist/{geeklist_id}"

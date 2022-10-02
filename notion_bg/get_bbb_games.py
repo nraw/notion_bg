@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 from requests.utils import quote
 from loguru import logger
 
+
 def get_bbb_games():
     logger.info("Obtaining bbb games")
     url = "http://bohemiaboardsandbrews.com/games"
@@ -15,6 +16,7 @@ def get_bbb_games():
     games_raw = bs.find_all("div", class_="game_rollover")
     games = clean_games(games_raw)
     return games
+
 
 def clean_games(games_raw):
     games = pd.DataFrame([game.text for game in games_raw], columns=["raw_game"])
