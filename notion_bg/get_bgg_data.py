@@ -15,7 +15,7 @@ def get_bgg_data(new_game, bgg_id=None):
         try:
             logger.info(f"Getting bgg info via name - {new_game}")
             game = bgg.game(new_game)
-        except:
+        except Exception:
             logger.info(f"Getting bgg info via google - {new_game}")
             bgg_id, bgg_url = get_bgg_url(new_game)
             game = bgg.game(game_id=bgg_id)

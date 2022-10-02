@@ -4,6 +4,8 @@ import requests
 from boardgamegeek import BGGClient
 from loguru import logger
 
+from notion_bg.get_notion_games import get_notion_games
+
 
 def upload_games():
     games = get_bgg_wishlist()
@@ -50,7 +52,7 @@ def create_bgg_game(game_id, game_data):
     bgg_url = "https://boardgamegeek.com/boardgame/" + str(game_id)
 
     json_data = {
-        "parent": {"database_id": "14a0eda608be4da284229fe06491ecb7"},
+        "parent": {"database_id": database_id},
         "properties": {
             "Name": {"title": [{"text": {"content": game_data["name"]}}]},
             "Status": {"select": {"name": state}},
