@@ -8,6 +8,7 @@ import re
 
 def get_tlama(bgg_name, new_game_data):
 
+    tlama_meta = None
     if "Tlama" in conf["data_updates"]:
         tlama_backup = new_game_data["properties"]["Tlama Backup"]["url"]
         tlama_current = new_game_data["properties"]["Tlama"]["url"]
@@ -21,12 +22,14 @@ def get_tlama(bgg_name, new_game_data):
             res_html = res.text
             bs = BeautifulSoup(res_html, "lxml")
             games_raw = bs.find_all("div", class_="p")
-            if games_raw:
-                first_game = games_raw[0]
+            for first_game in games_raw:
                 tlama_name = first_game.find(attrs={"data-micro": "name"}).text.strip()
                 tlama_url_rel = first_game.find("a", attrs={"data-micro": "url"})[
                     "href"
                 ]
+                if "/rental/" in tlama_url_rel:
+                    logger.info(f"Skipping rental url: {tlama_url_rel}")
+                    continue
                 tlama_url = "https://www.tlamagames.com" + tlama_url_rel
                 tlama_meta = dict(title=tlama_name, url=tlama_url)
                 if tlama_backup is not None:
@@ -34,10 +37,8 @@ def get_tlama(bgg_name, new_game_data):
                     if tlama_backup_url == tlama_url:
                         logger.info("Tlama url same as before")
                         tlama_meta = None
-            else:
-                tlama_meta = None
-    else:
-        tlama_meta = None
+                if tlama_url:
+                    break
     return tlama_meta
 
 

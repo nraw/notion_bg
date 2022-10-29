@@ -17,7 +17,7 @@ conf = {
         "Youtube Dice Tower",
         "Tlama",
     ],
-    "games_filters": ["new", "all", "id", "bgg_id"],
+    "games_filters": ["new", "all", "id", "bgg_id", "all_including_bought_passed"],
     "bgg_id": 232830,
     "all_updates": [
         "Name",
