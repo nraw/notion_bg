@@ -27,8 +27,8 @@ def get_tlama(bgg_name, new_game_data):
                 tlama_url_rel = first_game.find("a", attrs={"data-micro": "url"})[
                     "href"
                 ]
-                if "/rental/" in tlama_url_rel:
-                    logger.info(f"Skipping rental url: {tlama_url_rel}")
+                if "/board-games/" not in tlama_url_rel:
+                    logger.info(f"Skipping wrong url: {tlama_url_rel}")
                     continue
                 tlama_url = "https://www.tlamagames.com" + tlama_url_rel
                 tlama_meta = dict(title=tlama_name, url=tlama_url)

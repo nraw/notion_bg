@@ -2,7 +2,7 @@ from bg_notion.get_tlama import *
 
 
 def test_get_tlama():
-    bgg_name = "Hanabi"
+    bgg_name = "Cat in the box"
     new_game_data = {
         "properties": {"Tlama": {"url": None}, "Tlama Backup": {"url": None}}
     }
