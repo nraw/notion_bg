@@ -15,7 +15,8 @@ def get_bbb_games():
     bs = BeautifulSoup(res_html, "lxml")
     games_raw = bs.find_all("div", class_="game_rollover")
     games = clean_games(games_raw)
-    return games
+    games_list = list(games["game"])
+    return games_list
 
 
 def clean_games(games_raw):

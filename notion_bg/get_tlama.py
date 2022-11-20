@@ -49,4 +49,5 @@ def get_tlama_showroom():
         "mirdata", own=True, exclude_subtype="boardgameexpansion"
     )
     tlama_showroom = {game.id: game._data for game in games_batch if "id" in dir(game)}
-    return tlama_showroom
+    tlama_showroom_list = tlama_showroom.keys()
+    return tlama_showroom_list

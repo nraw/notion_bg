@@ -20,8 +20,7 @@ def test_main():
         "Youtube SUSD",
         "Youtube Dice Tower",
         "Tlama",
-    ]    
+    ]
     data = get_notion_games()
     selected_games = filter_games(data)
     process_selected_games(selected_games, data)
-

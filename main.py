@@ -81,49 +81,56 @@ def get_notion_name(game):
 
 def process_selected_games(selected_games, data):
     if selected_games:
-        if "In BGA" in conf["data_updates"]:
-            bga_games = get_bga_games()
-        if "In BBB" in conf["data_updates"]:
-            bbb_games = get_bbb_games()
-        if "In Tlama Showroom" in conf["data_updates"]:
-            tlama_showroom = get_tlama_showroom()
-        if "In Svet Her" in conf["data_updates"]:
-            svet_her_games = get_svet_her()
+        collections = download_collections()
     for new_id, new_game_data in selected_games.items():
-        new_game = get_notion_name(new_game_data)
-        logger.info(f"Processing {new_game}")
-        bgg_id = check_bgg_id(new_id, new_game_data)
-        bgg_meta = get_bgg_data(new_game, bgg_id)
-        bgg_name = bgg_meta["bgg_name"]
-        bgg_id = bgg_meta["bgg_id"]
-        if "In BGA" in conf["data_updates"]:
-            in_bga = str(bgg_id) in bga_games
-        else:
-            in_bga = None
-        if "In BBB" in conf["data_updates"]:
-            in_bbb = bgg_name in list(bbb_games["game"])
-        else:
-            in_bbb = None
-        if "In Tlama Showroom" in conf["data_updates"]:
-            in_tlama_showroom = bgg_id in list(tlama_showroom.keys())
-        else:
-            in_tlama_showroom = None
-        if "In Svet Her" in conf["data_updates"]:
-            in_svet_her = bgg_name in list(svet_her_games["game"])
-        else:
-            in_svet_her = None
-        yt_meta = get_youtube_meta(bgg_name)
-        tlama_meta = get_tlama(bgg_name, new_game_data)
-        game_meta = dict(
-            bgg_meta=bgg_meta,
-            in_bga=in_bga,
-            in_tlama_showroom=in_tlama_showroom,
-            in_bbb=in_bbb,
-            in_svet_her=in_svet_her,
-            yt_meta=yt_meta,
-            tlama_meta=tlama_meta,
-        )
+        game_meta = get_game_meta(new_id, new_game_data, collections)
         update_notion_game(new_id, new_game, game_meta)
+
+
+def download_collections():
+    collections = {}
+    if "In BGA" in conf["data_updates"]:
+        collections["In BGA"] = get_bga_games()
+    if "In BBB" in conf["data_updates"]:
+        collections["In BBB"] = get_bbb_games()
+    if "In Tlama Showroom" in conf["data_updates"]:
+        collections["In Tlama Showroom"] = get_tlama_showroom()
+    if "In Svet Her" in conf["data_updates"]:
+        collections["In Svet Her"] = get_svet_her()
+    return collections
+
+
+def get_game_meta(new_id, new_game_data, collections):
+    new_game = get_notion_name(new_game_data)
+    logger.info(f"Processing {new_game}")
+    bgg_id = check_bgg_id(new_id, new_game_data)
+    bgg_meta = get_bgg_data(new_game, bgg_id)
+    bgg_name = bgg_meta["bgg_name"]
+    bgg_id = bgg_meta["bgg_id"]
+    in_bga = check_in_collection(bgg_id, "In BGA", collections)
+    in_tlama_showroom = check_in_collection(bgg_id, "In Tlama Showroom", collections)
+    in_bbb = check_in_collection(bgg_name, "In BBB", collections)
+    in_svet_her = check_in_collection(bgg_id, "In Svet Her", collections)
+    yt_meta = get_youtube_meta(bgg_name)
+    tlama_meta = get_tlama(bgg_name, new_game_data)
+    game_meta = dict(
+        bgg_meta=bgg_meta,
+        in_bga=in_bga,
+        in_tlama_showroom=in_tlama_showroom,
+        in_bbb=in_bbb,
+        in_svet_her=in_svet_her,
+        yt_meta=yt_meta,
+        tlama_meta=tlama_meta,
+    )
+    return game_meta
+
+
+def check_in_collection(game_info, collection, collections):
+    if collection in conf["data_updates"]:
+        in_collection = game_info in collections[collection]
+    else:
+        in_collection = None
+    return in_collection
 
 
 if __name__ == "__main__":

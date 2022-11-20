@@ -30,4 +30,5 @@ def get_svet_her():
         else:
             break
     games = clean_games(games_raw)
-    return games
+    games_list = list(games["game"])
+    return games_list
