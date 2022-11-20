@@ -5,7 +5,7 @@ import json
 from loguru import logger
 
 
-def update_notion_game(new_id, new_game, game_meta):
+def update_notion_game(new_id, game_meta):
     notion_token = os.environ["notion_token"]
 
     headers = {
@@ -19,7 +19,7 @@ def update_notion_game(new_id, new_game, game_meta):
             "title": [{"text": {"content": game_meta["bgg_meta"]["bgg_name"]}}]
         }
     if "OG name" in conf["data_updates"]:
-        properties["OG name"] = {"rich_text": [{"text": {"content": new_game}}]}
+        properties["OG name"] = {"rich_text": [{"text": {"content": game_meta['og_name']}}]}
     if "bgg_id" in conf["data_updates"]:
         properties["bgg_id"] = {"number": game_meta["bgg_meta"]["bgg_id"]}
     if "bgg_url" in conf["data_updates"]:

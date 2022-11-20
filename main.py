@@ -84,7 +84,8 @@ def process_selected_games(selected_games, data):
         collections = download_collections()
     for new_id, new_game_data in selected_games.items():
         game_meta = get_game_meta(new_id, new_game_data, collections)
-        update_notion_game(new_id, new_game, game_meta)
+        new_game = game_meta
+        update_notion_game(new_id, game_meta)
 
 
 def download_collections():
@@ -121,6 +122,7 @@ def get_game_meta(new_id, new_game_data, collections):
         in_svet_her=in_svet_her,
         yt_meta=yt_meta,
         tlama_meta=tlama_meta,
+        og_name = new_game
     )
     return game_meta
 
