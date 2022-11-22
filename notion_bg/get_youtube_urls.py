@@ -5,8 +5,33 @@ import googleapiclient.discovery
 import googleapiclient.errors
 from notion_bg.config import conf
 
+channels = {
+    "Youtube Dice Tower": "UCiwBbXQlljGjKtKhcdMliRA",
+    "Youtube SUSD": "UCyRhIGDUKdIOw07Pd8pHxCw",
+}
 
-def get_youtube_meta(bgg_name):
+query_additions = {"Youtube": " board game review", "Youtube HowTo": " how to play"}
+
+
+def get_youtube_metas(bgg_name):
+    yt_meta = dict()
+    for data_update in conf["data_updates"]:
+        if data_update.split()[0] == "Youtube":
+            yt_meta[data_update] = get_youtube_meta(bgg_name, data_update)
+    return yt_meta
+
+
+def get_youtube_meta(bgg_name, data_update):
+    youtube = get_youtube_engine()
+    query_addition = query_additions.get(data_update, "")
+    query = bgg_name + query_addition
+    channel_id = channels.get(data_update, None)
+    yt_meta = get_yt_meta(query, channel_id, youtube)
+    return yt_meta
+
+
+@lru_cache(1)
+def get_youtube_engine():
     api_service_name = "youtube"
     api_version = "v3"
     google_api_key = os.environ["google_api_key"]
@@ -14,26 +39,7 @@ def get_youtube_meta(bgg_name):
     youtube = googleapiclient.discovery.build(
         api_service_name, api_version, developerKey=google_api_key
     )
-
-    if "Youtube" in conf["data_updates"]:
-        query = bgg_name + " board game review"
-        general_yt_meta = get_yt_meta(query, None, youtube)
-    else:
-        general_yt_meta = None
-
-    if "Youtube SUSD" in conf["data_updates"]:
-        dice_tower_id = "UCiwBbXQlljGjKtKhcdMliRA"
-        dt_yt_meta = get_yt_meta(bgg_name, dice_tower_id, youtube)
-    else:
-        dt_yt_meta = None
-
-    if "Youtube Dice Tower" in conf["data_updates"]:
-        susd_id = "UCyRhIGDUKdIOw07Pd8pHxCw"
-        susd_yt_meta = get_yt_meta(bgg_name, susd_id, youtube)
-    else:
-        susd_yt_meta = None
-    yt_meta = dict(general=general_yt_meta, dt=dt_yt_meta, susd=susd_yt_meta)
-    return yt_meta
+    return youtube
 
 
 def get_yt_meta(game, channel_id, youtube):

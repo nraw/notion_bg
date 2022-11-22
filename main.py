@@ -5,15 +5,11 @@ import fire
 from bs4 import BeautifulSoup
 
 from notion_bg.get_notion_games import get_notion_games
-from notion_bg.get_bgg_data import get_bgg_data, check_bgg_id
-from notion_bg.get_bga_games import get_bga_games
-from notion_bg.get_bbb_games import get_bbb_games
-from notion_bg.get_svet_her import get_svet_her
-from notion_bg.get_tlama import get_tlama_showroom, get_tlama
-from notion_bg.get_youtube_urls import get_youtube_meta
 from notion_bg.update_notion_game import update_notion_game
 from notion_bg.config import conf
 from loguru import logger
+from notion_bg.get_game_meta import get_game_meta
+from notion_bg.download_collections import download_collections
 
 
 def main(
@@ -74,11 +70,6 @@ def filter_games(data):
     return selected_games
 
 
-def get_notion_name(game):
-    game_name = game["properties"]["Name"]["title"][0]["plain_text"]
-    return game_name
-
-
 def process_selected_games(selected_games, data):
     if selected_games:
         collections = download_collections()
@@ -86,53 +77,6 @@ def process_selected_games(selected_games, data):
         game_meta = get_game_meta(new_id, new_game_data, collections)
         new_game = game_meta
         update_notion_game(new_id, game_meta)
-
-
-def download_collections():
-    collections = {}
-    if "In BGA" in conf["data_updates"]:
-        collections["In BGA"] = get_bga_games()
-    if "In BBB" in conf["data_updates"]:
-        collections["In BBB"] = get_bbb_games()
-    if "In Tlama Showroom" in conf["data_updates"]:
-        collections["In Tlama Showroom"] = get_tlama_showroom()
-    if "In Svet Her" in conf["data_updates"]:
-        collections["In Svet Her"] = get_svet_her()
-    return collections
-
-
-def get_game_meta(new_id, new_game_data, collections):
-    new_game = get_notion_name(new_game_data)
-    logger.info(f"Processing {new_game}")
-    bgg_id = check_bgg_id(new_id, new_game_data)
-    bgg_meta = get_bgg_data(new_game, bgg_id)
-    bgg_name = bgg_meta["bgg_name"]
-    bgg_id = bgg_meta["bgg_id"]
-    in_bga = check_in_collection(bgg_id, "In BGA", collections)
-    in_tlama_showroom = check_in_collection(bgg_id, "In Tlama Showroom", collections)
-    in_bbb = check_in_collection(bgg_name, "In BBB", collections)
-    in_svet_her = check_in_collection(bgg_id, "In Svet Her", collections)
-    yt_meta = get_youtube_meta(bgg_name)
-    tlama_meta = get_tlama(bgg_name, new_game_data)
-    game_meta = dict(
-        bgg_meta=bgg_meta,
-        in_bga=in_bga,
-        in_tlama_showroom=in_tlama_showroom,
-        in_bbb=in_bbb,
-        in_svet_her=in_svet_her,
-        yt_meta=yt_meta,
-        tlama_meta=tlama_meta,
-        og_name = new_game
-    )
-    return game_meta
-
-
-def check_in_collection(game_info, collection, collections):
-    if collection in conf["data_updates"]:
-        in_collection = game_info in collections[collection]
-    else:
-        in_collection = None
-    return in_collection
 
 
 if __name__ == "__main__":
