@@ -3,7 +3,14 @@ import os
 import google_auth_oauthlib.flow
 import googleapiclient.discovery
 import googleapiclient.errors
+
 from notion_bg.config import conf
+
+youtube_channel_maps = {
+    "Youtube": None,
+    "Youtube SUSD": "UCyRhIGDUKdIOw07Pd8pHxCw",
+    "Youtube Dice Tower": "UCiwBbXQlljGjKtKhcdMliRA",
+}
 
 
 def get_youtube_meta(bgg_name):
@@ -14,25 +21,17 @@ def get_youtube_meta(bgg_name):
     youtube = googleapiclient.discovery.build(
         api_service_name, api_version, developerKey=google_api_key
     )
-
-    if "Youtube" in conf["data_updates"]:
-        query = bgg_name + " board game review"
-        general_yt_meta = get_yt_meta(query, None, youtube)
-    else:
-        general_yt_meta = None
-
-    if "Youtube SUSD" in conf["data_updates"]:
-        dice_tower_id = "UCiwBbXQlljGjKtKhcdMliRA"
-        dt_yt_meta = get_yt_meta(bgg_name, dice_tower_id, youtube)
-    else:
-        dt_yt_meta = None
-
-    if "Youtube Dice Tower" in conf["data_updates"]:
-        susd_id = "UCyRhIGDUKdIOw07Pd8pHxCw"
-        susd_yt_meta = get_yt_meta(bgg_name, susd_id, youtube)
-    else:
-        susd_yt_meta = None
-    yt_meta = dict(general=general_yt_meta, dt=dt_yt_meta, susd=susd_yt_meta)
+    yt_meta = {}
+    for channel_name in youtube_channel_maps:
+        if channel_name in conf["data_updates"]:
+            channel_id = youtube_channel_maps[channel_name]
+            if channel_id:
+                query = bgg_name
+            else:
+                query = bgg_name + " board game review"
+            yt_meta[channel_name] = get_yt_meta(query, None, youtube)
+        else:
+            yt_meta[channel_name] = None
     return yt_meta
 
 

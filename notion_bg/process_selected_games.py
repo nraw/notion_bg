@@ -1,0 +1,80 @@
+from loguru import logger
+
+from notion_bg.config import conf
+from notion_bg.get_bbb_games import get_bbb_games
+from notion_bg.get_bga_games import get_bga_games
+from notion_bg.get_bgg_data import check_bgg_id, get_bgg_data
+from notion_bg.get_svet_her import get_svet_her
+from notion_bg.get_tabletop_finder import get_tabletop_finder
+from notion_bg.get_tlama import get_tlama, get_tlama_showroom
+from notion_bg.get_youtube_urls import get_youtube_meta
+from notion_bg.update_notion_game import update_notion_game
+
+collections_map = {
+    "In BGA": get_bga_games,
+    "In BBB": get_bbb_games,
+    "In Tlama Showroom": get_tlama_showroom,
+    "In Svet Her": get_svet_her,
+}
+
+game_info_map = {
+    "In BGA": "bgg_id",
+    "In BBB": "bgg_id",
+    "In Tlama Showroom": "bgg_name",
+    "In Svet Her": "bgg_name",
+}
+
+
+def process_selected_games(selected_games):
+    if selected_games:
+        collections = download_collections()
+    else:
+        collections = None
+    for new_id, new_game_data in selected_games.items():
+        game_meta = get_game_meta(new_game_data, collections)
+        update_notion_game(new_id, game_meta)
+
+
+def download_collections():
+    collections = {}
+    for collection_name in collections_map:
+        if collection_name in conf["data_updates"]:
+            collections[collection_name] = collections_map[collection_name]()
+    return collections
+
+
+def get_game_meta(new_game_data, collections):
+    new_game = get_notion_name(new_game_data)
+    logger.info(f"Processing {new_game}")
+    bgg_id = check_bgg_id(new_game_data)
+    bgg_meta = get_bgg_data(new_game, bgg_id)
+    game_meta = bgg_meta
+    game_meta["Name"] = bgg_meta["bgg_name"]
+    game_meta["Num players"] = bgg_meta["players"]
+    for collection_name in collections_map:
+        game_info = bgg_meta[game_info_map[collection_name]]
+        game_meta[collection_name] = check_in_collection(
+            game_info, collection_name, collections
+        )
+    game_meta["tabletop_finder"] = get_tabletop_finder(bgg_meta["bgg_name"])
+    tlama_meta = get_tlama(bgg_meta["bgg_name"], new_game_data)
+    if tlama_meta:
+        game_meta.update(tlama_meta)
+    yt_meta = get_youtube_meta(bgg_meta["bgg_name"])
+    if yt_meta:
+        game_meta.update(yt_meta)
+    game_meta["OG name"] = new_game
+    return game_meta
+
+
+def get_notion_name(game):
+    game_name = game["properties"]["Name"]["title"][0]["plain_text"]
+    return game_name
+
+
+def check_in_collection(game_info, collection_name, collections):
+    if collection_name in conf["data_updates"]:
+        in_collection = game_info in collections[collection_name]
+    else:
+        in_collection = None
+    return in_collection

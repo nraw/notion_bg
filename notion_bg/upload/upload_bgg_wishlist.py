@@ -1,5 +1,7 @@
-import pandas as pd
 import json
+import os
+
+import pandas as pd
 import requests
 from boardgamegeek import BGGClient
 from loguru import logger
@@ -42,8 +44,9 @@ def create_bgg_game(game_id, game_data):
     state = states[int(game_data["wishlistpriority"])]
 
     database_id = "14a0eda608be4da284229fe06491ecb7"
+    notion_token = os.environ["notion_token"]
     headers = {
-        "Authorization": "Bearer " + token,
+        "Authorization": "Bearer " + notion_token,
         "Content-Type": "application/json",
         "Notion-Version": "2022-06-28",
     }

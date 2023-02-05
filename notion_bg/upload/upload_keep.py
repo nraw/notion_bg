@@ -1,5 +1,7 @@
-import pandas as pd
 import json
+import os
+
+import pandas as pd
 import requests
 
 
@@ -11,6 +13,7 @@ def upload_games():
 
 
 def create_game(game, description):
+    notion_token = os.environ["notion_token"]
 
     database_id = "14a0eda608be4da284229fe06491ecb7"
     headers = {
@@ -20,7 +23,7 @@ def create_game(game, description):
     }
 
     json_data = {
-        "parent": {"database_id": "14a0eda608be4da284229fe06491ecb7"},
+        "parent": {"database_id": database_id},
         "properties": {
             "Name": {"title": [{"text": {"content": game}}]},
             "Status": {"select": {"name": "Need more info"}},

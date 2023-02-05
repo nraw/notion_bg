@@ -1,4 +1,5 @@
-from main import *
+from notion_bg.config import conf
+from notion_bg.main_pipeline import *
 
 
 def test_main():
@@ -23,4 +24,4 @@ def test_main():
     ]
     data = get_notion_games()
     selected_games = filter_games(data)
-    process_selected_games(selected_games, data)
+    process_selected_games(selected_games)

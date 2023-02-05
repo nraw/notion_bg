@@ -1,9 +1,9 @@
 import os
-import requests
+from urllib.parse import quote
 
+import requests
 from boardgamegeek import BGGClient, BGGItemNotFoundError
 from loguru import logger
-from urllib.parse import quote
 
 
 def get_bgg_data(new_game, bgg_id=None):
@@ -40,7 +40,7 @@ def get_bgg_data(new_game, bgg_id=None):
     return bgg_meta
 
 
-def check_bgg_id(new_id, new_game_data):
+def check_bgg_id(new_game_data):
     bgg_id = new_game_data["properties"]["bgg_id"]["number"]
     if bgg_id:
         logger.info("bgg id exists")
