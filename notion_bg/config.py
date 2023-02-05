@@ -16,6 +16,7 @@ conf = {
         "Youtube SUSD",
         "Youtube Dice Tower",
         "Tlama",
+        "Tabletop Finder",
     ],
     "games_filters": ["new", "all", "id", "bgg_id", "all_including_bought_passed"],
     "bgg_id": 232830,
@@ -34,5 +35,6 @@ conf = {
         "Youtube SUSD",
         "Youtube Dice Tower",
         "Tlama",
+        "Tabletop Finder",
     ],
 }

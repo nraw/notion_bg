@@ -3,6 +3,7 @@ import os
 import google_auth_oauthlib.flow
 import googleapiclient.discovery
 import googleapiclient.errors
+from loguru import logger
 
 from notion_bg.config import conf
 
@@ -36,13 +37,17 @@ def get_youtube_meta(bgg_name):
 
 
 def get_yt_meta(game, channel_id, youtube):
-    first_vid = get_first_vid(game, channel_id, youtube)
-    if first_vid:
-        yt_id = first_vid["id"]["videoId"]
-        url = "https://www.youtube.com/watch?v=" + yt_id
-        title = first_vid["snippet"]["title"]
-        yt_meta = dict(url=url, title=title, yt_id=yt_id)
-    else:
+    try:
+        first_vid = get_first_vid(game, channel_id, youtube)
+        if first_vid:
+            yt_id = first_vid["id"]["videoId"]
+            url = "https://www.youtube.com/watch?v=" + yt_id
+            title = first_vid["snippet"]["title"]
+            yt_meta = dict(url=url, title=title, yt_id=yt_id)
+        else:
+            yt_meta = None
+    except Exception as e:
+        logger.error(f"Youtube problem: {e}")
         yt_meta = None
     return yt_meta
 

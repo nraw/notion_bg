@@ -34,6 +34,7 @@ variables_map = {
     "Youtube SUSD": "url",
     "Youtube Dice Tower": "url",
     "Tlama": "url",
+    "Tabletop Finder": "url",
 }
 
 

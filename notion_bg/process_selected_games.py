@@ -56,7 +56,7 @@ def get_game_meta(new_game_data, collections):
         game_meta[collection_name] = check_in_collection(
             game_info, collection_name, collections
         )
-    game_meta["tabletop_finder"] = get_tabletop_finder(bgg_meta["bgg_name"])
+    game_meta["Tabletop Finder"] = get_tabletop_finder(bgg_meta["bgg_name"])
     tlama_meta = get_tlama(bgg_meta["bgg_name"], new_game_data)
     if tlama_meta:
         game_meta.update(tlama_meta)
