@@ -1,46 +1,24 @@
 from loguru import logger
 
 from notion_bg.config import conf
-from notion_bg.get_bbb_games import get_bbb_games
-from notion_bg.get_bga_games import get_bga_games
 from notion_bg.get_bgg_data import check_bgg_id, get_bgg_data
-from notion_bg.get_svet_her import get_svet_her
 from notion_bg.get_tabletop_finder import get_tabletop_finder
-from notion_bg.get_tlama import get_tlama, get_tlama_showroom
+from notion_bg.get_tlama import get_tlama
 from notion_bg.get_youtube_urls import get_youtube_meta
 from notion_bg.update_notion_game import update_notion_game
-
-collections_map = {
-    "In BGA": get_bga_games,
-    "In BBB": get_bbb_games,
-    "In Tlama Showroom": get_tlama_showroom,
-    "In Svet Her": get_svet_her,
-}
 
 game_info_map = {
     "In BGA": "bgg_id",
     "In BBB": "bgg_id",
-    "In Tlama Showroom": "bgg_name",
+    "In Tlama Showroom": "bgg_id",
     "In Svet Her": "bgg_name",
 }
 
 
-def process_selected_games(selected_games):
-    if selected_games:
-        collections = download_collections()
-    else:
-        collections = None
+def process_selected_games(selected_games, collections):
     for new_id, new_game_data in selected_games.items():
         game_meta = get_game_meta(new_game_data, collections)
         update_notion_game(new_id, game_meta)
-
-
-def download_collections():
-    collections = {}
-    for collection_name in collections_map:
-        if collection_name in conf["data_updates"]:
-            collections[collection_name] = collections_map[collection_name]()
-    return collections
 
 
 def get_game_meta(new_game_data, collections):
@@ -51,7 +29,7 @@ def get_game_meta(new_game_data, collections):
     game_meta = bgg_meta
     game_meta["Name"] = bgg_meta["bgg_name"]
     game_meta["Num players"] = bgg_meta["players"]
-    for collection_name in collections_map:
+    for collection_name in game_info_map:
         game_info = bgg_meta[game_info_map[collection_name]]
         game_meta[collection_name] = check_in_collection(
             game_info, collection_name, collections

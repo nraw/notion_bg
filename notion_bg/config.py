@@ -9,7 +9,7 @@ conf = {
         "bgg_rating",
         "Num players",
         "In BBB",
-        "In Svet Her",
+        #  "In Svet Her"
         "In Tlama Showroom",
         "In BGA",
         "Youtube",
@@ -28,7 +28,7 @@ conf = {
         "bgg_rating",
         "Num players",
         "In BBB",
-        "In Svet Her",
+        #  "In Svet Her",
         "In Tlama Showroom",
         "In BGA",
         "Youtube",
