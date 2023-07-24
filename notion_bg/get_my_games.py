@@ -14,6 +14,7 @@ def get_my_games():
     expansions_not_owned = filter_owned_expansions(all_expansions, nraw_games_list)
     expansions = pd.DataFrame(expansions_not_owned)
     expansions = expansions[~expansions.name.str.lower().str.contains("promo")]
+    expansions_meta = get_expansions_meta(bgg, expansions)
 
 
 def get_my_games_list(bgg):
@@ -56,3 +57,17 @@ def filter_owned_expansions(all_expansions, nraw_games_list):
         if int(e["id"]) not in nraw_games_list
     ]
     return expansions_not_owned
+
+
+def get_expansions_meta(bgg, expansions):
+    expansions_metadata = []
+    for expansion_id in tqdm(expansions.id):
+        expansion = bgg.game(game_id=expansion_id)
+        expansions_metadata += [expansion.data()]
+    expansions_meta = pd.DataFrame(expansions_metadata)
+    return expansions_meta
+
+
+def get_plays(bgg):
+    plays = bgg.plays("nraw")
+    return plays
