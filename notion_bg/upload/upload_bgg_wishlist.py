@@ -1,7 +1,5 @@
-import json
 import os
 
-import pandas as pd
 import requests
 from boardgamegeek import BGGClient
 from loguru import logger
