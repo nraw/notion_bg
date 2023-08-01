@@ -8,6 +8,7 @@ from notion_bg.get_notion_games import get_notion_games
 
 
 def upload_games():
+    logger.info("Uploading games from bgg wishlist")
     games = get_bgg_wishlist()
     notion_game_list = get_notion_game_list()
     for game_id, game_data in games.items():
