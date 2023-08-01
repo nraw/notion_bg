@@ -3,6 +3,7 @@ from loguru import logger
 
 from notion_bg.config import conf
 from notion_bg.main_pipeline import main_pipeline
+from notion_bg.upload.upload_bgg_wishlist import upload_games
 
 
 def main(
@@ -17,6 +18,7 @@ def main(
     logger.info(f"data_updates: {data_updates}")
     if games_filter == "bgg_id":
         logger.info(f"data_updates: {bgg_id}")
+    upload_games()
     main_pipeline()
 
 

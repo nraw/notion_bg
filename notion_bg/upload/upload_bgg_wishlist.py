@@ -14,7 +14,7 @@ def upload_games():
     notion_game_list = get_notion_game_list()
     for game_id, game_data in games.items():
         game_name = game_data["name"]
-        if game_name not in notion_game_list:
+        if game_id not in notion_game_list:
             logger.info(f"Adding {game_name}")
             create_bgg_game(game_id, game_data)
         else:
@@ -33,14 +33,19 @@ def get_bgg_wishlist():
 def get_notion_game_list():
     data = get_notion_games()
     results = data["results"]
-    notion_game_list = [
-        g["properties"]["Name"]["title"][0]["plain_text"] for g in results
-    ]
+    notion_game_list = [g["properties"]["bgg_id"]["number"] for g in results]
     return notion_game_list
 
 
 def create_bgg_game(game_id, game_data):
-    states = ["Bought", "Not on Tlama", "Want to buy", "Want to try", "Need more info"]
+    states = [
+        "Wakalaka",
+        "Want to buy",
+        "Want to try",
+        "Need more info",
+        "Need more info",
+        "Pass",
+    ]
     state = states[int(game_data["wishlistpriority"])]
 
     database_id = "14a0eda608be4da284229fe06491ecb7"
