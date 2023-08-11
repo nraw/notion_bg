@@ -1,4 +1,4 @@
-from bg_notion.get_tlama import *
+from notion_bg.get_tlama import *
 
 
 def test_get_tlama():

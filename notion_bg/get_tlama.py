@@ -1,13 +1,16 @@
-import requests
-from loguru import logger
-from bs4 import BeautifulSoup
-from boardgamegeek import BGGClient
-from notion_bg.config import conf
 import re
+from time import sleep
+
+import requests
+from boardgamegeek import BGGApiError, BGGClient
+from bs4 import BeautifulSoup
+from loguru import logger
+
+from notion_bg.config import conf
+from notion_bg.get_collection import get_collection
 
 
 def get_tlama(bgg_name, new_game_data):
-
     tlama_meta = None
     if "Tlama" in conf["data_updates"]:
         tlama_backup = new_game_data["properties"]["Tlama Backup"]["url"]
@@ -45,8 +48,9 @@ def get_tlama(bgg_name, new_game_data):
 def get_tlama_showroom():
     logger.info("Obtaining Tlama Showroom games")
     bgg = BGGClient()
-    games_batch = bgg.collection(
-        "mirdata", own=True, exclude_subtype="boardgameexpansion"
+
+    games_batch = get_collection(
+        bgg, user_name="mirdata", own=True, exclude_subtype="boardgameexpansion"
     )
     tlama_showroom = {game.id: game._data for game in games_batch if "id" in dir(game)}
     tlama_showroom_list = tlama_showroom.keys()

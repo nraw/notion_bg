@@ -5,6 +5,8 @@ from boardgamegeek import BGGClient
 from loguru import logger
 from tqdm import tqdm
 
+from notion_bg.get_collection import get_collection
+
 
 def get_my_games():
     logger.info("Obtaining my games")
@@ -18,7 +20,8 @@ def get_my_games():
 
 
 def get_my_games_list(bgg):
-    games_batch = bgg.collection("nraw", own=True)
+    games_batch = get_collection(bgg, user_name="nraw", own=True)
+    #  games_batch = bgg.collection("nraw", own=True)
     nraw_games = {game.id: game._data for game in games_batch if "id" in dir(game)}
     nraw_games_list = list(nraw_games.keys())
     return nraw_games_list

@@ -11,3 +11,4 @@ loguru
 tqdm
 lxml
 fire
+retry

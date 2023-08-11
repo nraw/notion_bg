@@ -1,8 +1,9 @@
 import os
+from time import sleep
 from urllib.parse import quote
 
 import requests
-from boardgamegeek import BGGClient, BGGItemNotFoundError
+from boardgamegeek import BGGApiError, BGGClient, BGGItemNotFoundError
 from loguru import logger
 
 
@@ -10,7 +11,13 @@ def get_bgg_data(new_game, bgg_id=None):
     bgg = BGGClient()
     if bgg_id:
         logger.info(f"Getting bgg info via id - {new_game}")
-        game = bgg.game(game_id=bgg_id)
+        try:
+            game = bgg.game(game_id=bgg_id)
+        except BGGApiError:
+            logger.error("Failed to connect to bgg, trying again")
+            sleep(2)
+            game = bgg.game(game_id=bgg_id)
+
     else:
         try:
             logger.info(f"Getting bgg info via name - {new_game}")

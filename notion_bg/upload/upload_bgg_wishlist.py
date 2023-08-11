@@ -4,6 +4,7 @@ import requests
 from boardgamegeek import BGGClient
 from loguru import logger
 
+from notion_bg.get_collection import get_collection
 from notion_bg.get_notion_games import get_notion_games
 
 
@@ -22,8 +23,8 @@ def upload_games():
 
 def get_bgg_wishlist():
     bgg = BGGClient()
-    games_batch = bgg.collection(
-        "nraw", wishlist=True, exclude_subtype="boardgameexpansion"
+    games_batch = get_collection(
+        bgg, user_name="nraw", wishlist=True, exclude_subtype="boardgameexpansion"
     )
     games = {game.id: game._data for game in games_batch if "id" in dir(game)}
     return games
