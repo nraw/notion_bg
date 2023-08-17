@@ -34,6 +34,7 @@ variables_map = {
     "Youtube SUSD": "url",
     "Youtube Dice Tower": "url",
     "Tlama": "url",
+    "Tlama Backup": "url",
     "Tabletop Finder": "url",
 }
 
@@ -46,7 +47,7 @@ def update_notion_game(new_id, game_meta):
 def get_properties(game_meta):
     properties = {}
     for property in variables_map:
-        if property in conf["data_updates"]:
+        if property in conf["data_updates"] or property == "Tlama Backup":
             if property in game_meta:
                 variable = variables_map[property]
                 handler = notion_handlers_map[variable]
