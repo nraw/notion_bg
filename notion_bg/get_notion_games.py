@@ -1,5 +1,7 @@
-import requests
+import json
 import os
+
+import requests
 
 
 def get_notion_games():
@@ -18,4 +20,13 @@ def get_notion_data(database_id, headers):
     url = f"https://api.notion.com/v1/databases/{database_id}/query"
     res = requests.post(url, headers=headers)
     data = res.json()
+    has_more = data["has_more"]
+    while has_more:
+        next_cursor = data["next_cursor"]
+        query_data = {"start_cursor": next_cursor}
+        res = requests.post(url, headers=headers, data=json.dumps(query_data))
+        new_data = res.json()
+        data["results"] += new_data["results"]
+        has_more = new_data["has_more"]
+
     return data
