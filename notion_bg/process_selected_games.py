@@ -17,8 +17,11 @@ game_info_map = {
 
 def process_selected_games(selected_games, collections):
     for new_id, new_game_data in selected_games.items():
-        game_meta = get_game_meta(new_game_data, collections)
-        update_notion_game(new_id, game_meta)
+        try:
+            game_meta = get_game_meta(new_game_data, collections)
+            update_notion_game(new_id, game_meta)
+        except Exception as e:
+            logger.error(f"Failed to process {new_id}: {e}")
 
 
 def get_game_meta(new_game_data, collections):
