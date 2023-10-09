@@ -8,11 +8,11 @@ from loguru import logger
 def get_geeklist(geeklist_id, key="objectid", comments=False):
     geeklist_url = f"https://www.boardgamegeek.com/xmlapi/geeklist/{geeklist_id}"
     if comments:
-        geeklist_url += '?comments=1'
+        geeklist_url += "?comments=1"
 
     res = get_response_with_retries(geeklist_url)
     xml_content = res.content
-    bs = BeautifulSoup(xml_content, "lxml")
+    bs = BeautifulSoup(xml_content, "xml")
     items = bs.find_all("item")
     if key:
         geeklist = [item.get("objectid") for item in items]

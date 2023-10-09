@@ -8,22 +8,37 @@ from tqdm import tqdm
 from notion_bg.get_collection import get_collection
 
 
-def get_my_games():
+@lru_cache(4)
+def get_my_expansions(drop_promo=True, obtain_meta=True):
     logger.info("Obtaining my games")
     bgg = BGGClient()
     nraw_games_list = get_my_games_list(bgg)
     all_expansions = get_expansions(nraw_games_list, bgg)
     expansions_not_owned = filter_owned_expansions(all_expansions, nraw_games_list)
-    expansions = pd.DataFrame(expansions_not_owned)
-    expansions = expansions[~expansions.name.str.lower().str.contains("promo")]
-    expansions_meta = get_expansions_meta(bgg, expansions)
+    expansions_and_promos = pd.DataFrame(expansions_not_owned)
+    if drop_promo:
+        expansions = expansions_and_promos[
+            ~expansions_and_promos.name.str.lower().str.contains("promo")
+        ]
+    else:
+        expansions = expansions_and_promos
+    if obtain_meta:
+        expansions_meta = get_expansions_meta(bgg, expansions)
+        return expansions_meta
+    else:
+        return expansions
 
 
-def get_my_games_list(bgg):
+def get_my_games_list(bgg, return_feature="bgg_id"):
     games_batch = get_collection(bgg, user_name="nraw", own=True)
     #  games_batch = bgg.collection("nraw", own=True)
     nraw_games = {game.id: game._data for game in games_batch if "id" in dir(game)}
-    nraw_games_list = list(nraw_games.keys())
+    if return_feature == "bgg_id":
+        nraw_games_list = list(nraw_games.keys())
+    elif return_feature == "bgg_name":
+        nraw_games_list = [g["name"] for g in nraw_games.values()]
+    else:
+        nraw_games_list = nraw_games
     return nraw_games_list
 
 

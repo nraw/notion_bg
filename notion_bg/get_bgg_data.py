@@ -24,7 +24,7 @@ def get_bgg_data(new_game, bgg_id=None):
             game = bgg.game(new_game)
         except Exception:
             logger.info(f"Getting bgg info via google - {new_game}")
-            bgg_id, bgg_url = get_bgg_url(new_game)
+            bgg_id = get_bgg_url(new_game)
             game = bgg.game(game_id=bgg_id)
     bgg_name = game.name
     if new_game != bgg_name:
@@ -58,8 +58,7 @@ def check_bgg_id(new_game_data):
 
 def get_bgg_url(new_game):
     wishlist_scanner_url = os.environ["wishlist_scanner_url"]
-    url = wishlist_scanner_url + "?barcode=" + quote(new_game)
+    url = wishlist_scanner_url + "?query=" + quote(new_game)
     res = requests.get(url)
-    bgg_url = res.text
-    bgg_id = bgg_url.split("/")[-2]
-    return bgg_id, bgg_url
+    bgg_id = res.text
+    return bgg_id
