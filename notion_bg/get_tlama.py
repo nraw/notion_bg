@@ -15,33 +15,41 @@ def get_tlama(bgg_name, new_game_data):
     if "Tlama" in conf["data_updates"]:
         tlama_backup = new_game_data["properties"]["Tlama Backup"]["url"]
         tlama_current = new_game_data["properties"]["Tlama"]["url"]
-        if tlama_current is not None and tlama_backup != tlama_current:
-            logger.info("Tlama url was manually meddled with")
-            tlama_meta = None
-        else:
-            #  url = f"https://www.tlamagames.com/vyhledavani/?string={bgg_name}"
-            url = f"https://www.tlamagames.com/en/search/?string={bgg_name}"
-            res = requests.get(url)
-            res_html = res.text
-            bs = BeautifulSoup(res_html, "lxml")
-            games_raw = bs.find_all("div", class_="p")
-            for first_game in games_raw:
-                tlama_name = first_game.find(attrs={"data-micro": "name"}).text.strip()
-                tlama_url_rel = first_game.find("a", attrs={"data-micro": "url"})[
-                    "href"
-                ]
-                if "/board-games/" not in tlama_url_rel:
-                    logger.info(f"Skipping wrong url: {tlama_url_rel}")
-                    continue
-                tlama_url = "https://www.tlamagames.com" + tlama_url_rel
-                tlama_meta = dict(title=tlama_name, url=tlama_url)
-                if tlama_backup is not None:
-                    tlama_backup_url = re.sub(".*\(", "", tlama_backup).replace(")", "")
-                    if tlama_backup_url == tlama_url:
-                        logger.info("Tlama url same as before")
-                        tlama_meta = None
-                if tlama_url:
-                    break
+        #  url = f"https://www.tlamagames.com/vyhledavani/?string={bgg_name}"
+        url = f"https://www.tlamagames.com/en/search/?string={bgg_name}"
+        res = requests.get(url)
+        res_html = res.text
+        bs = BeautifulSoup(res_html, "lxml")
+        games_raw = bs.find_all("div", class_="p")
+        for first_game in games_raw:
+            tlama_name = first_game.find(attrs={"data-micro": "name"}).text.strip()
+            # under div with class "price"
+            tlama_price = first_game.find("div", class_="price").text.strip()
+            tlama_availability = first_game.find(
+                "div", class_="availability"
+            ).text.strip()
+            tlama_url_rel = first_game.find("a", attrs={"data-micro": "url"})["href"]
+            if "/board-games/" not in tlama_url_rel:
+                logger.info(f"Skipping wrong url: {tlama_url_rel}")
+                continue
+            tlama_url = "https://www.tlamagames.com" + tlama_url_rel
+            tlama_meta = dict(
+                title=tlama_name,
+                url=tlama_url,
+                price=tlama_price,
+                availability=tlama_availability,
+            )
+            if tlama_backup is not None:
+                tlama_backup_url = re.sub(".*\(", "", tlama_backup).replace(")", "")
+                if tlama_current is not None and tlama_backup != tlama_current:
+                    logger.info("Tlama url was manually meddled with")
+                    #  tlama_meta["url"] = tlama_current
+                    tlama_meta["url"] = None
+                if tlama_backup_url == tlama_url:
+                    logger.info("Tlama url same as before")
+                    tlama_meta["url"] = None
+            if tlama_url:
+                break
     return tlama_meta
 
 

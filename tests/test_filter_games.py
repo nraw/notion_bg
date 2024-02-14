@@ -15,3 +15,6 @@ def test_games_filter_bgg_id():
     data = get_notion_games()
     selected_games = filter_games(data)
     assert type(selected_games) == dict
+    selected_game = selected_games[next(iter(selected_games))]
+    bgg_id = selected_game["properties"]["bgg_id"]["number"]
+    assert bgg_id == conf["bgg_id"]

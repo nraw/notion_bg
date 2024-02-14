@@ -40,8 +40,11 @@ def get_game_meta(new_game_data, collections):
     game_meta["Tabletop Finder"] = get_tabletop_finder(bgg_meta["bgg_name"])
     tlama_meta = get_tlama(bgg_meta["bgg_name"], new_game_data)
     if tlama_meta:
-        game_meta["Tlama"] = tlama_meta
-        game_meta["Tlama Backup"] = tlama_meta
+        game_meta["Tlama Price"] = tlama_meta["price"]
+        game_meta["Tlama Availability"] = tlama_meta["availability"]
+        if tlama_meta["url"]:
+            game_meta["Tlama"] = tlama_meta
+            game_meta["Tlama Backup"] = tlama_meta
     yt_meta = get_youtube_meta(bgg_meta["bgg_name"])
     if yt_meta:
         game_meta.update(yt_meta)
