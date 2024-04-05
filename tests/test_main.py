@@ -50,6 +50,8 @@ def test_main_bgg_id():
     data = get_notion_games()
     selected_games = filter_games(data)
     collections = download_collections()
+    new_game_data = next(iter(selected_games.values()))
+    game_meta = get_game_meta(new_game_data, collections)
     process_selected_games(selected_games, collections)
 
 
@@ -71,6 +73,15 @@ def test_main_specific():
         #  "Youtube Dice Tower",
         #  "Tlama",
     ]
+    data = get_notion_games()
+    selected_games = filter_games(data)
+    collections = download_collections()
+    process_selected_games(selected_games, collections)
+
+
+def test_main_tlama():
+    conf["games_filter"] = "all"
+    conf["data_updates"] = ["Tlama", "Tlama Price", "Tlama Availability"]
     data = get_notion_games()
     selected_games = filter_games(data)
     collections = download_collections()

@@ -27,3 +27,14 @@ def test_get_tlama_manual():
     }
     new_tlama_meta = get_tlama(bgg_name, new_game_data)
     assert new_tlama_meta is None
+
+
+def test_get_tlama_with_correct():
+    bgg_name = "Hanabi"
+    new_game_data = {
+        "properties": {
+            "Tlama": {"url": "https://www.tlamagames.com/en/board-games/hanabio/"},
+            "Tlama Backup": {"url": "[hanabi](something)"},
+        }
+    }
+    new_tlama_meta = get_tlama(bgg_name, new_game_data)
