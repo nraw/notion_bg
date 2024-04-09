@@ -12,20 +12,17 @@ def upload_games():
     logger.info("Uploading games from bgg wishlist")
     games = get_bgg_wishlist()
     notion_game_list = get_notion_game_list()
-    for game_id, game_data in games.items():
+    missing_games = get_missing_games(games, notion_game_list)
+    logger.info(f"Adding {len(missing_games)} games")
+    for game_id, game_data in missing_games.items():
         game_name = game_data["name"]
-        if game_id not in notion_game_list:
-            logger.info(f"Adding {game_name}")
-            create_bgg_game(game_id, game_data)
-        else:
-            logger.info(f"Skipping {game_name}")
+        logger.info(f"Adding {game_name}")
+        create_bgg_game(game_id, game_data)
 
 
 def get_bgg_wishlist():
     bgg = BGGClient()
-    games_batch = get_collection(
-        bgg, user_name="nraw", wishlist=True, exclude_subtype="boardgameexpansion"
-    )
+    games_batch = get_collection(bgg, user_name="nraw", wishlist=True)
     games = {game.id: game._data for game in games_batch if "id" in dir(game)}
     return games
 
@@ -35,6 +32,15 @@ def get_notion_game_list():
     results = data["results"]
     notion_game_list = [g["properties"]["bgg_id"]["number"] for g in results]
     return notion_game_list
+
+
+def get_missing_games(games, notion_game_list):
+    missing_games = {
+        game_id: game_data
+        for game_id, game_data in games.items()
+        if game_id not in notion_game_list
+    }
+    return missing_games
 
 
 def create_bgg_game(game_id, game_data):
