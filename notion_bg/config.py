@@ -19,6 +19,8 @@ conf = {
         "Tlama Price",
         "Tlama Availability",
         "Tabletop Finder",
+        "Igraj.si",
+        "Igraj.si Price",
     ],
     "games_filters": ["new", "all", "id", "bgg_id", "all_including_bought_passed"],
     "bgg_id": 232830,
@@ -40,5 +42,7 @@ conf = {
         "Tlama Price",
         "Tlama Availability",
         "Tabletop Finder",
+        "Igraj.si",
+        "Igraj.si Price",
     ],
 }

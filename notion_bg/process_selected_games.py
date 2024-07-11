@@ -2,6 +2,7 @@ from loguru import logger
 
 from notion_bg.config import conf
 from notion_bg.get_bgg_data import check_bgg_id, get_bgg_data
+from notion_bg.get_igraj_si import get_igraj_si
 from notion_bg.get_tabletop_finder import get_tabletop_finder
 from notion_bg.get_tlama import get_tlama
 from notion_bg.get_youtube_urls import get_youtube_meta
@@ -48,6 +49,11 @@ def get_game_meta(new_game_data, collections):
             game_meta["Tlama"] = tlama_meta
             game_meta["Tlama Backup"] = tlama_meta
     yt_meta = get_youtube_meta(bgg_meta["bgg_name"])
+    igraj_si_meta = get_igraj_si(bgg_meta["bgg_name"])
+    if igraj_si_meta:
+        game_meta["Igraj.si"] = igraj_si_meta["url"]
+        game_meta["Igraj.si Price"] = igraj_si_meta["price"]
+
     if yt_meta:
         game_meta.update(yt_meta)
     game_meta["OG name"] = new_game

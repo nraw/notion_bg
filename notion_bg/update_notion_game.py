@@ -6,9 +6,14 @@ import requests
 from loguru import logger
 
 from notion_bg.config import conf
-from notion_bg.notion_handlers import (checkbox_handler, multiselect_handler,
-                                       number_handler, rich_text_handler,
-                                       title_handler, url_handler)
+from notion_bg.notion_handlers import (
+    checkbox_handler,
+    multiselect_handler,
+    number_handler,
+    rich_text_handler,
+    title_handler,
+    url_handler,
+)
 
 notion_handlers_map = {
     "title": title_handler,
@@ -38,6 +43,8 @@ variables_map = {
     "Tlama Availability": "text",
     "Tlama Backup": "url",
     "Tabletop Finder": "url",
+    "Igraj.si": "url",
+    "Igraj.si Price": "text",
 }
 
 

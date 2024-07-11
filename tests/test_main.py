@@ -64,14 +64,19 @@ def test_main_specific():
         #  "bgg_url",
         #  "bgg_rating",
         #  "Num players",
-        "In BBB",
+        #  "In BBB",
         #  "In Svet Her",
-        "In Tlama Showroom",
+        #  "In Tlama Showroom",
         #  "In BGA",
         #  "Youtube",
         #  "Youtube SUSD",
         #  "Youtube Dice Tower",
         #  "Tlama",
+        #  "Tlama Price",
+        #  "Tlama Availability",
+        #  "Tabletop Finder",
+        "Igraj.si",
+        "Igraj.si Price",
     ]
     data = get_notion_games()
     selected_games = filter_games(data)
