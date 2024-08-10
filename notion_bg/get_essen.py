@@ -3,49 +3,117 @@ from collections import Counter
 
 import iterfzf
 import yaml
+from boardgamegeek import BGGClient
 from loguru import logger
+from pydantic import BaseModel
 
 from notion_bg.get_geeklist import get_geeklist
 from notion_bg.get_my_expansions import get_my_expansions, get_my_games_list
 from notion_bg.get_notion_games import get_notion_games
 
 
-def compare_essen_sales():
-    essen_url = "https://boardgamegeek.com/geeklist/319184/essen-2023-no-shipping-auction-list-post-your-own?itemid="
+class Game(BaseModel):
+    bgg_id: int
+    name: str
+    url: str
+    bid: int
+    auction_end: str
+    thumbnail: str
+    language: str
+    has_comment: bool
+
+    @classmethod
+    def from_g(cls, g, bgg=BGGClient()):
+        essen_url = "https://boardgamegeek.com/geeklist/339779/the-essen-2024-no-shipping-auction-list-post-your?itemid="
+        bgg = BGGClient()
+        name = g.get("objectname")
+        auction_end = get_auction_end(g)
+        language = get_language(g)
+        url = essen_url + g.get("id")
+        bid = get_last_bid(g)
+        bgg_id = g.get("objectid")
+        thumbnail = get_thumbnail_from_bgg(bgg, bgg_id)
+        has_comment = g.find("comment") is not None
+        data = dict(
+            name=name,
+            url=url,
+            bgg_id=bgg_id,
+            bid=bid,
+            auction_end=auction_end,
+            thumbnail=thumbnail,
+            language=language,
+            has_comment=has_comment,
+        )
+        return cls.model_validate(data)
+
+
+def get_my_essen_games():
+    #  essen_url = "https://boardgamegeek.com/geeklist/319184/essen-2023-no-shipping-auction-list-post-your-own?itemid="
+    essen_url = "https://boardgamegeek.com/geeklist/339779/the-essen-2024-no-shipping-auction-list-post-your?itemid="
     notion_game_list = get_notion_game_list()
     essen_sales_games, essen_sales_ids = get_essen_sales()
     #  nset = set(nraw_games_list)
     nset = set(notion_game_list)
     eset = set(essen_sales_ids)
 
-    whitelist = ["9963241", "10087556", "10008677", "10066644", "10020531"]  # kupljeno
-    whitelist += ["9980317", "9976957"]  # prodano
-    blacklist = ["10017821", "9963360"]
+    #  whitelist = ["9963241", "10087556", "10008677", "10066644", "10020531"]  # kupljeno
+    whitelist = ["10974714"]  # kupljeno
+    whitelist += []  # prodano
+    blacklist = []
+
+    # find game
+    #  find_game(essen_sales_games)
 
     # my bids stuff
+    bidding, my_bids = get_bidding(blacklist, essen_sales_games, whitelist)
+
+    # my past bids stuff
+    bidders, past_bidding = get_past_bidding(essen_sales_games)
+
+    bought = get_bought(essen_sales_games, whitelist)
+
+    # wishlist stuff
+    available, available_games, wishlisted = get_wishlisted(
+        eset, essen_sales_games, nset, my_bids
+    )
+
+    # my offers
+    selling = get_selling(essen_sales_games)
+    my_essen_games = dict(
+        wishlisted=wishlisted,
+        bidding=bidding,
+        past_bidding=past_bidding,
+        bought=bought,
+        selling=selling,
+    )
+
+    return my_essen_games
+
+
+def get_thumbnail_from_bgg(bgg, game_id):
+    game = bgg.game(game_id=game_id)
+    return game.thumbnail
+
+
+def get_bidding(blacklist, essen_sales_games, whitelist):
     my_bids = [g for g in essen_sales_games if (get_last_bidder(g) == "nraw")]
     my_bids = [g for g in my_bids if g.get("id") not in whitelist]
     my_bids = [g for g in my_bids if g.get("id") not in blacklist]
-    lesgo = [
-        [
-            g.get("objectname"),
-            get_auction_end(g),
-            essen_url + g.get("id"),
-            get_last_bid(g),
-        ]
-        for g in my_bids
-    ]
-    lesgo.sort()
-    lesgo.sort(key=lambda x: x[1])
-    print(yaml.dump(lesgo))
-    sum([i[3] for i in lesgo])
+    bidding = [Game.from_g(g) for g in my_bids]
+    #  bidding.sort()
+    #  bidding.sort(key=lambda x: x[1])
+    #  print(yaml.dump(bidding))
+    #  sum([i[3] for i in bidding])
+    return bidding, my_bids
 
-    # find game
+
+def find_game(essen_sales_games):
     all_games = list({g.get("objectname") for g in essen_sales_games})
     all_games.sort()
     check_game(all_games, essen_sales_games)
 
-    # my past bids stuff
+
+def get_past_bidding(essen_sales_games):
     player = "nraw"
     my_past_bids = []
     for g in essen_sales_games:
@@ -53,52 +121,44 @@ def compare_essen_sales():
         if bidders:
             if player in bidders[:-1]:
                 my_past_bids += [g]
-    lesgo = [
-        [
-            g.get("objectname"),
-            get_auction_end(g),
-            essen_url + g.get("id"),
-            get_last_bid(g),
-        ]
-        for g in my_past_bids
-    ]
-    lesgo.sort(key=lambda x: x[1])
-    print(yaml.dump(lesgo))
+    past_bidding = [Game.from_g(g) for g in my_past_bids]
+    #  past_bidding.sort(key=lambda x: x[1])
+    #  print(yaml.dump(past_bidding))
+    return bidders, past_bidding
 
+
+def get_bought(essen_sales_games, whitelist) -> None:
     bought_stuff = [g for g in essen_sales_games if g.get("id") in whitelist]
-    lesgo = [
-        [
-            g.get("objectname"),
-            get_auction_end(g),
-            essen_url + g.get("id"),
-            get_last_bid(g),
-        ]
-        for g in bought_stuff
-    ]
-    lesgo.sort()
-    print(yaml.dump(lesgo))
-    sum([i[3] for i in lesgo])
+    bought = [Game.from_g(g) for g in bought_stuff]
+    #  bought.sort()
+    #  print(yaml.dump(bought))
+    #  sum([i[3] for i in bought])
+    return bought
 
-    # wishlist stuff
+
+def get_wishlisted(eset, essen_sales_games, nset, my_bids) -> None:
     available = nset.intersection(eset)
     available_games = [g for g in essen_sales_games if not check_is_sold(g, available)]
     my_bids_ids = [g.get("objectid") for g in my_bids]
     not_bidding_already = [
         g for g in available_games if g.get("objectid") not in my_bids_ids
     ]
-    lesgo = [
-        [
-            g.get("objectname") + " (" + get_language(g) + ")",
-            essen_url + g.get("id"),
-            get_last_bid(g),
-            get_auction_end(g),
-        ]
-        for g in not_bidding_already
-    ]
-    lesgo.sort()
-    lesgo.sort(key=lambda x: x[0])
-    lesgo.sort(key=lambda x: x[1])
-    print(yaml.dump(lesgo))
+    wishlisted = [Game.from_g(g) for g in not_bidding_already]
+    #  wishlisted.sort()
+    #  wishlisted.sort(key=lambda x: x[0])
+    #  wishlisted.sort(key=lambda x: x[1])
+    #  print(yaml.dump(wishlisted))
+    return available, available_games, wishlisted
+
+
+def get_selling(essen_sales_games):
+    my_offers = [g for g in essen_sales_games if g.get("username") == "nraw"]
+    selling = [Game.from_g(g) for g in my_offers]
+    #  print(yaml.dump(selling))
+    return selling
+
+
+def extras():
 
     # expansions
 
@@ -123,6 +183,7 @@ def compare_essen_sales():
 
     #  notion_game_names = get_notion_game_list(return_feature="bgg_name")
 
+    bgg = BGGClient()
     nraw_games_list = get_my_games_list(bgg, return_feature="bgg_name")
     outside_name = "Outside the Scope of BGG"
     outside_games = [
@@ -145,19 +206,6 @@ def compare_essen_sales():
     ]
     lesgo.sort()
     lesgo.sort(key=lambda x: x[1])
-    print(yaml.dump(lesgo))
-
-    # my offers
-    my_offers = [g for g in essen_sales_games if g.get("username") == "nraw"]
-    lesgo = [
-        [
-            g.get("objectname"),
-            essen_url + g.get("id"),
-            get_last_bid(g),
-            g.find("comment") is not None,
-        ]
-        for g in my_offers
-    ]
     print(yaml.dump(lesgo))
 
     bidders = [get_last_bidder(g) for g in essen_sales_games]
@@ -283,7 +331,8 @@ def get_games_info(game_ids):
 
 def get_essen_sales():
     logger.info("Obtaining Essen sale games")
-    essen_geeklist_id = "319184"  # Essen
+    #  essen_geeklist_id = "319184"  # Essen
+    essen_geeklist_id = "339779"  # Essen 2024
     essen_sales_games = get_geeklist(essen_geeklist_id, None, comments=True)
     essen_sales_ids = [int(game.get("objectid")) for game in essen_sales_games]
     return essen_sales_games, essen_sales_ids

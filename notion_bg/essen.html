@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Board Game Auction Analysis</title>
+	<script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 p-8">
+	<div class="mx-auto">
+		<h1 class="text-3xl font-bold mb-8 text-center">Essen Overview</h1>
+
+		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
+			{% for category, games in my_essen_games.items() %}
+			<div class="bg-white rounded-lg shadow overflow-hidden">
+				<h2 class="text-xl font-semibold p-4 bg-blue-600 text-white">
+					{{ category }}
+				</h2>
+				<ul class="divide-y divide-gray-200">
+					{% for game in games|reverse %}
+					<li class="p-4 flex items-center gap-2">
+						<div class="basis-1/4">
+							<img src="{{ game.thumbnail }}" class="w-20 h-20 object-cover rounded mr-4" />
+						</div>
+						<div class="flex-auto">
+							<a href="{{ game.url }}">{{ game.name }}</a>
+							<p class="text-gray-500 text-sm">{{ game.language }}</p>
+						</div>
+						<div>
+							<!-- if has comment, color it blue -->
+							{% if game.has_comment %}
+							<span class="text-blue-600">{{ game.bid }}€</span>
+							{% else %}
+							<span>{{ game.bid }}€</span>
+							{% endif %}
+						</div>
+					</li>
+					{% endfor %}
+				</ul>
+			</div>
+			{% endfor %}
+		</div>
+	</div>
+
+	<div class="text-center mt-8 text-gray-500 text-sm">
+		Last updated: {{ timestamp }}
+	</div>
+</body>
+
+</html>

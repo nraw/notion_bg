@@ -1,0 +1,46 @@
+name: update_new
+
+on:
+  # push:
+    # branches: [source]
+  # pull_request:
+    # branches: [source]
+  schedule:
+    - cron:  '0 9,18 * * *'
+  workflow_dispatch:
+  repository_dispatch:
+    types:
+      - new
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  update_new:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout repo pendragon content
+        uses: actions/checkout@v2 # checkout the repository content to github runner.
+      - name: setup python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8 #install the python needed
+      - name: install stuff
+        run: |
+          make install
+      - name: execute py script # run the run.py to get the latest data
+        run: |
+          make essen_site
+      - name: Upload Page Artifact 🚀
+        uses: actions/upload-pages-artifact@v2
+        with:
+          name: github-pages
+          path: site
+        env:
+          notion_token: ${{ secrets.notion_token }}
+          wishlist_scanner_url: ${{ secrets.wishlist_scanner_url }}
+          google_api_key: ${{ secrets.google_api_key }}
+          # data: ${{ toJson(github.event.client_payload.data) }}

@@ -12,3 +12,4 @@ tqdm
 lxml
 fire
 retry
+Jinja2

@@ -1,7 +1,7 @@
 from functools import lru_cache
 
 import pandas as pd
-from boardgamegeek import BGGClient
+from boardgamegeek import BGGApiError, BGGClient
 from loguru import logger
 from tqdm import tqdm
 
@@ -45,8 +45,11 @@ def get_my_games_list(bgg, return_feature="bgg_id"):
 def get_expansions(nraw_games_list, bgg):
     expansions = []
     for bgg_id in tqdm(nraw_games_list):
-        game_expansions = get_expansions_for_game(bgg_id, bgg)
-        expansions.append(game_expansions)
+        try:
+            game_expansions = get_expansions_for_game(bgg_id, bgg)
+            expansions.append(game_expansions)
+        except BGGApiError as e:
+            logger.error(f"{e=}")
     return expansions
 
 
