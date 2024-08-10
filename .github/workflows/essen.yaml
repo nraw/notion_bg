@@ -1,4 +1,4 @@
-name: update_new
+name: make_essen_site
 
 on:
   # push:
@@ -18,7 +18,7 @@ permissions:
   id-token: write
 
 jobs:
-  update_new:
+  make_essen_site:
     runs-on: ubuntu-latest
 
     steps:
