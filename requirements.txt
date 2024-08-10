@@ -13,3 +13,6 @@ lxml
 fire
 retry
 Jinja2
+iterfzf
+PyYAML
+pydantic

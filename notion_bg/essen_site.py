@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 from pathlib import Path
 
 from jinja2 import Template
@@ -14,6 +14,6 @@ def create_my_essen_site():
 
     # Set up the Jinja2 environment
     template = Template(jinja_template)
-    timestamp = datetime.datetime.now(datetime.UTC)
+    timestamp = datetime.now()
     output = template.render(my_essen_games=my_essen_games, timestamp=timestamp)
     Path("site/essen.html").write_text(output)
