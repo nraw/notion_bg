@@ -1,3 +1,4 @@
+import asyncio
 import re
 from collections import Counter
 from typing import Optional
@@ -20,16 +21,15 @@ class Game(BaseModel):
     bid: int
     bin: Optional[int]
     auction_end: str
-    thumbnail: str
+    thumbnail: Optional[str]
     language: str
     has_comment: bool
     is_sold: bool
 
     @classmethod
-    def from_g(cls, g, bgg=BGGClient()):
+    def from_g(cls, g, thumbnail=None):
         #  essen_url = "https://boardgamegeek.com/geeklist/319184/essen-2023-no-shipping-auction-list-post-your-own?itemid="
         essen_url = "https://boardgamegeek.com/geeklist/339779/the-essen-2024-no-shipping-auction-list-post-your?itemid="
-        bgg = BGGClient()
         name = g.get("objectname")
         auction_end = get_auction_end(g)
         language = get_language(g)
@@ -37,7 +37,7 @@ class Game(BaseModel):
         bid = get_last_bid(g)
         bin = get_bin_price(g)
         bgg_id = g.get("objectid")
-        thumbnail = get_thumbnail_from_bgg(bgg, bgg_id)
+        #  thumbnail = get_thumbnail_from_bgg(bgg, bgg_id)
         has_comment = g.find("comment") is not None
         is_sold = check_is_sold(g)
         data = dict(
@@ -88,6 +88,11 @@ def get_my_essen_games():
     return my_essen_games
 
 
+async def get_thumbnail_from_bgg_async(bgg, game_id):
+    game = bgg.game(game_id=game_id)
+    return game.thumbnail
+
+
 def get_thumbnail_from_bgg(bgg, game_id):
     game = bgg.game(game_id=game_id)
     return game.thumbnail
@@ -105,6 +110,21 @@ def get_bidding(essen_sales_games):
     #  print(yaml.dump(bidding))
     #  sum([i[3] for i in bidding])
     return my_bids, bidding, bought
+
+
+def get_thumbnails(bgg, games):
+    thumbnails = [get_thumbnail_from_bgg(bgg, game.bgg_id) for game in games]
+    for game, thumbnail in zip(games, thumbnails):
+        game.thumbnail = thumbnail
+    return games
+
+
+async def get_thumbnails_async(bgg, games):
+    thumbnail_tasks = [get_thumbnail_from_bgg_async(bgg, game.bgg_id) for game in games]
+    thumbnails = await asyncio.gather(*thumbnail_tasks)
+    for game, thumbnail in zip(games, thumbnails):
+        game.thumbnail = thumbnail
+    return games
 
 
 def find_game(essen_sales_games):
@@ -443,7 +463,7 @@ def get_auction_end(g):
 
 
 def get_bin_price(g):
-    bin_price_match = re.search(r"\[b\]BIN\[/b\]:.*(\d*),-", g.text)
+    bin_price_match = re.search(r"BIN.*?(\d{1,3}),", g.text)
     if bin_price_match:
         try:
             bin_price = int(bin_price_match[1])
