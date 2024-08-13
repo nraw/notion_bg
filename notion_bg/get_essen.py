@@ -476,7 +476,7 @@ def get_bin_price(g):
 
 def get_language(g):
     language = re.search(r"Language.*? (.*)", g.text)
-    if language:
+    if language and "dependency" not in language[1]:
         language = language[1]
     else:
         language = "No idea"
