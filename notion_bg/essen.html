@@ -6,7 +6,6 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<title>My Essen Overview</title>
 	<script src="https://cdn.tailwindcss.com"></script>
-	<script type="text/javascript" src="https://livejs.com/live.js"></script>
 </head>
 
 <body class="bg-gray-100 p-8">
@@ -26,8 +25,10 @@
 							<img src="{{ game.thumbnail }}" class="w-20 h-20 object-cover rounded mr-4" />
 						</div>
 						<div class="flex-auto">
-							<a href="{{ game.url }}">{{ game.name }}</a>
+							<a href="{{ game.url }}" target="_blank" {% if game.is_sold %} class="line-through" {% endif %}>{{
+								game.name }}</a>
 							<p class="text-gray-500 text-sm">{{ game.language }}</p>
+							<p class="text-gray-500 text-sm">{{ game.auction_end }}</p>
 						</div>
 						<div>
 							<!-- if has comment, color it blue -->
@@ -35,6 +36,9 @@
 							<span class="text-blue-600">{{ game.bid }}€</span>
 							{% else %}
 							<span>{{ game.bid }}€</span>
+							{% endif %} {% if game.bin %}
+							<br />
+							<span class="text-gray-400">{{ game.bin }}€</span>
 							{% endif %}
 						</div>
 					</li>

@@ -1,5 +1,6 @@
 import re
 from collections import Counter
+from typing import Optional
 
 import iterfzf
 import yaml
@@ -17,13 +18,16 @@ class Game(BaseModel):
     name: str
     url: str
     bid: int
+    bin: Optional[int]
     auction_end: str
     thumbnail: str
     language: str
     has_comment: bool
+    is_sold: bool
 
     @classmethod
     def from_g(cls, g, bgg=BGGClient()):
+        #  essen_url = "https://boardgamegeek.com/geeklist/319184/essen-2023-no-shipping-auction-list-post-your-own?itemid="
         essen_url = "https://boardgamegeek.com/geeklist/339779/the-essen-2024-no-shipping-auction-list-post-your?itemid="
         bgg = BGGClient()
         name = g.get("objectname")
@@ -31,25 +35,27 @@ class Game(BaseModel):
         language = get_language(g)
         url = essen_url + g.get("id")
         bid = get_last_bid(g)
+        bin = get_bin_price(g)
         bgg_id = g.get("objectid")
         thumbnail = get_thumbnail_from_bgg(bgg, bgg_id)
         has_comment = g.find("comment") is not None
+        is_sold = check_is_sold(g)
         data = dict(
             name=name,
             url=url,
             bgg_id=bgg_id,
             bid=bid,
+            bin=bin,
             auction_end=auction_end,
             thumbnail=thumbnail,
             language=language,
             has_comment=has_comment,
+            is_sold=is_sold,
         )
         return cls.model_validate(data)
 
 
 def get_my_essen_games():
-    #  essen_url = "https://boardgamegeek.com/geeklist/319184/essen-2023-no-shipping-auction-list-post-your-own?itemid="
-    essen_url = "https://boardgamegeek.com/geeklist/339779/the-essen-2024-no-shipping-auction-list-post-your?itemid="
     notion_game_list = get_notion_game_list()
     essen_sales_games, essen_sales_ids = get_essen_sales()
     #  nset = set(nraw_games_list)
@@ -57,25 +63,17 @@ def get_my_essen_games():
     eset = set(essen_sales_ids)
 
     #  whitelist = ["9963241", "10087556", "10008677", "10066644", "10020531"]  # kupljeno
-    whitelist = ["10974714"]  # kupljeno
-    whitelist += []  # prodano
-    blacklist = []
 
     # find game
     #  find_game(essen_sales_games)
 
-    # my bids stuff
-    bidding, my_bids = get_bidding(blacklist, essen_sales_games, whitelist)
+    my_bids, bidding, bought = get_bidding(essen_sales_games)
 
     # my past bids stuff
     bidders, past_bidding = get_past_bidding(essen_sales_games)
 
-    bought = get_bought(essen_sales_games, whitelist)
-
     # wishlist stuff
-    available, available_games, wishlisted = get_wishlisted(
-        eset, essen_sales_games, nset, my_bids
-    )
+    wishlisted = get_wishlisted(eset, essen_sales_games, nset, my_bids)
 
     # my offers
     selling = get_selling(essen_sales_games)
@@ -95,16 +93,18 @@ def get_thumbnail_from_bgg(bgg, game_id):
     return game.thumbnail
 
 
-def get_bidding(blacklist, essen_sales_games, whitelist):
+def get_bidding(essen_sales_games):
     my_bids = [g for g in essen_sales_games if (get_last_bidder(g) == "nraw")]
-    my_bids = [g for g in my_bids if g.get("id") not in whitelist]
-    my_bids = [g for g in my_bids if g.get("id") not in blacklist]
-    bidding = [Game.from_g(g) for g in my_bids]
+    #  my_bids = [g for g in my_bids if g.get("id") not in whitelist]
+    #  my_bids = [g for g in my_bids if g.get("id") not in blacklist]
+    all_bidding = [Game.from_g(g) for g in my_bids]
+    bidding = [game for game in all_bidding if not game.is_sold]
+    bought = [game for game in all_bidding if game.is_sold]
     #  bidding.sort()
     #  bidding.sort(key=lambda x: x[1])
     #  print(yaml.dump(bidding))
     #  sum([i[3] for i in bidding])
-    return bidding, my_bids
+    return my_bids, bidding, bought
 
 
 def find_game(essen_sales_games):
@@ -138,7 +138,9 @@ def get_bought(essen_sales_games, whitelist) -> None:
 
 def get_wishlisted(eset, essen_sales_games, nset, my_bids) -> None:
     available = nset.intersection(eset)
-    available_games = [g for g in essen_sales_games if not check_is_sold(g, available)]
+    available_games = [
+        g for g in essen_sales_games if not check_is_available(g, available)
+    ]
     my_bids_ids = [g.get("objectid") for g in my_bids]
     not_bidding_already = [
         g for g in available_games if g.get("objectid") not in my_bids_ids
@@ -148,7 +150,7 @@ def get_wishlisted(eset, essen_sales_games, nset, my_bids) -> None:
     #  wishlisted.sort(key=lambda x: x[0])
     #  wishlisted.sort(key=lambda x: x[1])
     #  print(yaml.dump(wishlisted))
-    return available, available_games, wishlisted
+    return wishlisted
 
 
 def get_selling(essen_sales_games):
@@ -165,7 +167,9 @@ def extras():
     expansions = get_my_expansions(drop_promo=False, obtain_meta=False)
     nset = set(expansions["id"].astype(int))
     available = nset.intersection(eset)
-    available_games = [g for g in essen_sales_games if not check_is_sold(g, available)]
+    available_games = [
+        g for g in essen_sales_games if not check_is_available(g, available)
+    ]
     lesgo = [
         [
             g.get("objectname") + " (" + get_language(g) + ")",
@@ -252,7 +256,7 @@ def extras():
 
     # cheap games
 
-    available_games = [g for g in essen_sales_games if not check_is_sold(g, eset)]
+    available_games = [g for g in essen_sales_games if not check_is_available(g, eset)]
     cheap_games = [g for g in available_games if get_last_bid(g) == 1]
     lesgo = [
         [g.get("objectname") + " (" + get_language(g) + ")", essen_url + g.get("id")]
@@ -400,10 +404,23 @@ def get_all_bidders(g):
     return bidders
 
 
-def check_is_sold(g, available):
+def check_is_available(g, available):
     is_available = int(g.get("objectid")) in available
     if not is_available:
         return True
+    is_crossed = "[-]" in str(g)
+    if is_crossed:
+        return True
+    comments = g.find_all("comment")
+    message_bin = False
+    for comment in comments:
+        message_bin = "BIN" in comment.text
+        if message_bin:
+            return True
+    return False
+
+
+def check_is_sold(g):
     is_crossed = "[-]" in str(g)
     if is_crossed:
         return True
@@ -423,6 +440,18 @@ def get_auction_end(g):
     else:
         auction_end = ""
     return auction_end
+
+
+def get_bin_price(g):
+    bin_price_match = re.search(r"\[b\]BIN\[/b\]:.*(\d*),-", g.text)
+    if bin_price_match:
+        try:
+            bin_price = int(bin_price_match[1])
+        except ValueError:
+            bin_price = None
+    else:
+        bin_price = None
+    return bin_price
 
 
 def get_language(g):
