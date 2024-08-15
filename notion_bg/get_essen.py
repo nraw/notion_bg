@@ -39,7 +39,7 @@ class Game(BaseModel):
         bgg_id = g.get("objectid")
         #  thumbnail = get_thumbnail_from_bgg(bgg, bgg_id)
         has_comment = g.find("comment") is not None
-        is_sold = check_is_sold(g)
+        is_sold = check_is_sold(g, bid, bin)
         data = dict(
             name=name,
             url=url,
@@ -428,23 +428,25 @@ def check_is_available(g, available):
     is_available = int(g.get("objectid")) in available
     if not is_available:
         return True
-    is_crossed = "[-]" in str(g)
-    if is_crossed:
-        return True
-    comments = g.find_all("comment")
-    message_bin = False
-    for comment in comments:
-        message_bin = "BIN" in comment.text
-        if message_bin:
-            return True
+    #  is_crossed = "[-]" in str(g)
+    #  if is_crossed:
+    #      return True
+    #  comments = g.find_all("comment")
+    #  message_bin = False
+    #  for comment in comments:
+    #      message_bin = "BIN" in comment.text
+    #      if message_bin:
+    #          return True
     return False
 
 
-def check_is_sold(g):
+def check_is_sold(g, bid, bin):
     is_crossed = "[-]" in str(g)
     if is_crossed:
         return True
     comments = g.find_all("comment")
+    if bid == bin:
+        return True
     message_bin = False
     for comment in comments:
         message_bin = "BIN" in comment.text
