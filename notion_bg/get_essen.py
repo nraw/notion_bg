@@ -126,6 +126,14 @@ async def get_thumbnails_async(bgg, games):
         game.thumbnail = thumbnail
     return games
 
+from concurrent.futures import ThreadPoolExecutor
+
+def get_thumbnails_parallel(bgg, games):
+    with ThreadPoolExecutor() as executor:
+        thumbnails = list(executor.map(lambda game: get_thumbnail_from_bgg(bgg, game.bgg_id), games))
+    for game, thumbnail in zip(games, thumbnails):
+        game.thumbnail = thumbnail
+    return games
 
 def find_game(essen_sales_games):
     all_games = list({g.get("objectname") for g in essen_sales_games})
