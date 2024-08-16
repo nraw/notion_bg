@@ -13,6 +13,9 @@
 	<div class="mx-auto">
 		<h1 class="text-3xl font-bold mb-8 text-center">Essen Overview</h1>
 
+		<div class="text-center m-4 text-gray-500 text-sm">
+			Last updated: {{ timestamp }}
+		</div>
 		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
 			{% for category, games in my_essen_games.items() %}
 			<div class="bg-white rounded-lg shadow overflow-hidden">
@@ -48,10 +51,6 @@
 			</div>
 			{% endfor %}
 		</div>
-	</div>
-
-	<div class="text-center mt-8 text-gray-500 text-sm">
-		Last updated: {{ timestamp }}
 	</div>
 </body>
 
