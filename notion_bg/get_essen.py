@@ -376,7 +376,13 @@ def get_essen_sales():
 
 
 def get_notion_game_list(return_feature="bgg_id"):
-    cool_states = ["Want to buy", "Want to try", "Need more info", "Not on Tlama"]
+    cool_states = [
+        "Want to buy",
+        "Want to try",
+        "Need more info",
+        "Not on Tlama",
+        "Maybe",
+    ]
     data = get_notion_games()
     results = data["results"]
     if return_feature == "bgg_id":
