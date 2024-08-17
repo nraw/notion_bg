@@ -6,7 +6,7 @@ on:
   # pull_request:
     # branches: [source]
   schedule:
-    - cron:  '0,30 9-23 * 8-9 *'
+    - cron:  '0,30 7-22 * 8-9 *'
   workflow_dispatch:
   repository_dispatch:
     types:
