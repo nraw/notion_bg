@@ -13,7 +13,6 @@ notion
 numpy
 pandas
 pydantic
-python-telegram-bot
 requests
 requests-cache==0.5.2
 retry
