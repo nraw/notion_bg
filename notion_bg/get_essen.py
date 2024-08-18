@@ -1,7 +1,7 @@
 import asyncio
 import re
 from collections import Counter
-from typing import Optional
+from typing import List, Optional
 
 import iterfzf
 import yaml
@@ -57,11 +57,11 @@ class Game(BaseModel):
 
 
 class EssenGames(BaseModel):
-    bidding: list[Game]
-    past_bidding: list[Game]
-    wishlisted: list[Game]
-    bought: list[Game]
-    selling: list[Game]
+    bidding: List[Game]
+    past_bidding: List[Game]
+    wishlisted: List[Game]
+    bought: List[Game]
+    selling: List[Game]
 
     def __getitem__(self, key):
         return getattr(self, key)
@@ -217,7 +217,7 @@ def get_past_bidding(essen_sales_games):
     return bidders, past_bidding
 
 
-def get_bought(essen_sales_games, whitelist) -> list[Game]:
+def get_bought(essen_sales_games, whitelist) -> List[Game]:
     bought_stuff = [g for g in essen_sales_games if g.get("id") in whitelist]
     bought = [Game.from_g(g) for g in bought_stuff]
     #  bought.sort()
@@ -226,7 +226,7 @@ def get_bought(essen_sales_games, whitelist) -> list[Game]:
     return bought
 
 
-def get_wishlisted(eset, essen_sales_games, nset, my_bids) -> list[Game]:
+def get_wishlisted(eset, essen_sales_games, nset, my_bids) -> List[Game]:
     available = nset.intersection(eset)
     available_games = [
         g for g in essen_sales_games if not check_is_available(g, available)
