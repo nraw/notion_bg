@@ -6,6 +6,7 @@ from typing import Optional
 import iterfzf
 import yaml
 from boardgamegeek import BGGClient
+from dateutil.parser import parse
 from loguru import logger
 from pydantic import BaseModel
 
@@ -55,6 +56,61 @@ class Game(BaseModel):
         return cls.model_validate(data)
 
 
+class EssenGames(BaseModel):
+    bidding: list[Game]
+    past_bidding: list[Game]
+    wishlisted: list[Game]
+    bought: list[Game]
+    selling: list[Game]
+
+    def __getitem__(self, key):
+        return getattr(self, key)
+
+    def get_all_games(self):
+        for game_category, game_list in self.model_dump().items():
+            for game in game_list:
+                game["state"] = game_category
+                yield game
+
+    def compare_with_old(self, old_essen_games):
+        if old_essen_games is None:
+            return None
+        all_new_games = list(self.get_all_games())
+        all_old_games = list(old_essen_games.get_all_games())
+        parsed = []
+        messages = []
+        for new_game in all_new_games:
+            if new_game["url"] in parsed:
+                continue
+            for old_game in all_old_games:
+                if new_game["url"] == old_game["url"]:
+                    parsed.append(new_game["url"])
+                    if new_game["bid"] != old_game["bid"]:
+                        new_bid_message = compose_new_bid_message(new_game, old_game)
+                        messages.append(new_bid_message)
+                        print(new_bid_message)
+                    break
+
+            if new_game["url"] not in parsed:
+                new_game_message = compose_new_game_message(new_game)
+                messages.append(new_game_message)
+                print(new_game_message)
+        message = "\n".join(messages)
+        return message
+
+
+def compose_new_bid_message(new_game, old_game):
+    new_bid_message = f"[{new_game['name']}]({new_game['url']}) - {old_game['bid']} -> {new_game['bid']}"
+    if old_game["state"] == "bidding":
+        new_bid_message = "❗️ " + new_bid_message
+    return new_bid_message
+
+
+def compose_new_game_message(new_game):
+    new_game_message = f"🆕 [{new_game['name']}]({new_game['url']}) - {new_game['bid']}"
+    return new_game_message
+
+
 def get_my_essen_games():
     notion_game_list = get_notion_game_list()
     essen_sales_games, essen_sales_ids = get_essen_sales()
@@ -78,9 +134,9 @@ def get_my_essen_games():
     # my offers
     selling = get_selling(essen_sales_games)
     my_essen_games = dict(
-        wishlisted=wishlisted,
         bidding=bidding,
         past_bidding=past_bidding,
+        wishlisted=wishlisted,
         bought=bought,
         selling=selling,
     )
@@ -149,6 +205,7 @@ def find_game(essen_sales_games):
 def get_past_bidding(essen_sales_games):
     player = "nraw"
     my_past_bids = []
+    bidders = []
     for g in essen_sales_games:
         bidders = get_all_bidders(g)
         if bidders:
@@ -160,7 +217,7 @@ def get_past_bidding(essen_sales_games):
     return bidders, past_bidding
 
 
-def get_bought(essen_sales_games, whitelist) -> None:
+def get_bought(essen_sales_games, whitelist) -> list[Game]:
     bought_stuff = [g for g in essen_sales_games if g.get("id") in whitelist]
     bought = [Game.from_g(g) for g in bought_stuff]
     #  bought.sort()
@@ -169,7 +226,7 @@ def get_bought(essen_sales_games, whitelist) -> None:
     return bought
 
 
-def get_wishlisted(eset, essen_sales_games, nset, my_bids) -> None:
+def get_wishlisted(eset, essen_sales_games, nset, my_bids) -> list[Game]:
     available = nset.intersection(eset)
     available_games = [
         g for g in essen_sales_games if not check_is_available(g, available)
@@ -217,6 +274,12 @@ def extras():
     print(yaml.dump(lesgo))
 
     # expansions outside the scope
+
+    # Times of posting
+    postdates = [g.get("postdate") for g in essen_sales_games]
+    parsed_postdates = [parse(postdate) for postdate in postdates]
+    hours = [pd.hour for pd in parsed_postdates]
+    Counter(hours)
 
     #  notion_game_names = get_notion_game_list(return_feature="bgg_name")
 

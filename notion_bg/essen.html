@@ -143,6 +143,11 @@
 			{% endfor %}
 		</div>
 	</div>
+
+	<!-- Embedding the JSON object in a script tag -->
+	<script id="json-data" type="application/json">
+      {{ data_json | safe }}
+    </script>
 </body>
 
 </html>
