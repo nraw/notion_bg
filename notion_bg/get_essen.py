@@ -279,7 +279,19 @@ def extras():
     postdates = [g.get("postdate") for g in essen_sales_games]
     parsed_postdates = [parse(postdate) for postdate in postdates]
     hours = [pd.hour for pd in parsed_postdates]
-    Counter(hours)
+    hour_counter = Counter(hours)
+    df = pd.DataFrame(list(hour_counter.items()), columns=['hour', 'count'])
+    fig = px.bar(df, x='hour', y='count', title='Hour vs Count')
+    fig.show()
+
+    # Posts per day
+    postdates = [g.get("postdate") for g in essen_sales_games]
+    parsed_postdates = [parse(postdate) for postdate in postdates[18:]]
+    days = [pd.date() for pd in parsed_postdates]
+    date_counter = Counter(days)
+    df = pd.DataFrame(list(date_counter.items()), columns=['date', 'count'])
+    fig = px.bar(df, x='date', y='count', title='Date vs Count')
+    fig.show()
 
     #  notion_game_names = get_notion_game_list(return_feature="bgg_name")
 

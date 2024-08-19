@@ -23,6 +23,7 @@ def create_my_essen_site():
     old_essen_games = get_old_essen_games()
     message = new_essen_games.compare_with_old(old_essen_games)
     if message:
+        message = f"My [Essen games](https://nraw.github.io/notion_bg/essen) update:\n{message}"
         send_telegram(message)
 
     jinja_template = Path("notion_bg/essen.html").read_text()
