@@ -23,7 +23,7 @@ def get_geeklist(geeklist_id, key="objectid", comments=False):
 
 def get_response_with_retries(geeklist_url):
     status = 0
-    max_retries = 10
+    max_retries = 20
     sleep_time = 5
     retry_count = 0
     res = None
