@@ -111,20 +111,29 @@
 		<div class="text-center m-4 text-gray-400 text-sm">
 			Last updated: {{ timestamp }}
 		</div>
+
+		<div class="text-center m-4 text-gray-400 text-sm">
+			<button id="reorder-button" class="bg-gray-800 hover:bg-gray-700 text-gray-500 border-gray-500 border-2 py-2 px-4 rounded-full mt-4" data-index="0">Reorder</button>
+		</div>
+
 		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
 			{% for category, games in my_essen_games.items() %}
 			<div class="card rounded-lg shadow-lg overflow-hidden">
 				<h2 class="text-xl font-semibold p-4 text-white">{{ category }}</h2>
-				<ul class="divide-y divide-gray-600">
+				<ul class="divide-y divide-gray-600 sorting_container">
 					{% for game in games|reverse %}
-					<li class="p-4 flex items-center gap-2">
+					<li class="p-4 flex items-center gap-2" data-name="{{game.name}}" data-bid="{{game.bid}}" data-auction_end="{{game.auction_end}}" data-created="{{game.url}}">
 						<div class="basis-1/4">
 							<img src="{{ game.thumbnail }}" class="w-20 h-20 object-cover rounded mr-4" />
 						</div>
 						<div class="flex-auto">
 							<a href="{{ game.url }}" target="_blank" {% if game.is_sold %} class="line-through" {% endif %}>{{
 								game.name }}</a>
+							{% if "English" in game.language %}
 							<p class="text-gray-400 text-sm">{{ game.language }}</p>
+							{% else %}
+							<p class="text-gray-600 text-sm">{{ game.language }}</p>
+							{% endif %}
 							<p class="text-gray-400 text-sm">{{ game.auction_end }}</p>
 						</div>
 						<div class="price-container">
@@ -148,6 +157,68 @@
 	<script id="json-data" type="application/json">
       {{ data_json | safe }}
     </script>
+
+	<script>
+
+// Get the container and the button
+const button = document.getElementById("reorder-button");
+const attributes = ['name', 'bid', 'auction_end', 'created'];
+
+
+// Add an event listener to the button
+button.addEventListener("click", reorderDivs);
+
+// Function to reorder the divs
+function reorderDivs() {
+	// Get all the divs in the container
+
+	const containers = document.querySelectorAll(".sorting_container");
+	const button = document.getElementById("reorder-button");
+
+
+	let attributeValue = parseInt(button.dataset.index, 10) || 0;
+	const attributeIndexRaw = (attributeValue + 1) % (attributes.length * 2)
+	const attributeIndex = Math.floor(attributeIndexRaw / 2)
+	const direction = attributeIndexRaw % 2
+	const attribute = attributes[attributeIndex]
+	
+	containers.forEach(container => {
+
+		const divs = container.querySelectorAll("li");
+		console.log(attribute)
+
+		// Create an array of the divs
+		const divArray = Array.from(divs);
+
+		// Sort the array of divs
+		divArray.sort((a, b) => {
+				if (direction) {
+					[a, b] = [b, a]
+				}
+				const aValue = a.dataset[attribute];
+				const bValue = b.dataset[attribute];
+
+				// Check if the values are numeric
+				if (!isNaN(aValue) && !isNaN(bValue)) {
+						// Compare as numbers
+						return Number(aValue) - Number(bValue);
+				} else {
+						// Compare as strings
+						return aValue.localeCompare(bValue);
+				}
+		});
+
+		// Clear the container
+		container.innerHTML = "";
+
+		// Add the sorted divs back to the container
+		divArray.forEach((div) => container.appendChild(div));
+
+	});
+	button.dataset.index = attributeIndexRaw;
+	button.innerHTML = `Reordered by ${attribute} ${direction ? '↓' : '↑'}`;
+}
+	</script>
 </body>
 
 </html>

@@ -209,7 +209,7 @@ def get_past_bidding(essen_sales_games):
     for g in essen_sales_games:
         bidders = get_all_bidders(g)
         if bidders:
-            if player in bidders[:-1]:
+            if player in bidders[:-1] and player != bidders[-1]:
                 my_past_bids += [g]
     past_bidding = [Game.from_g(g) for g in my_past_bids]
     #  past_bidding.sort(key=lambda x: x[1])
@@ -280,8 +280,8 @@ def extras():
     parsed_postdates = [parse(postdate) for postdate in postdates]
     hours = [pd.hour for pd in parsed_postdates]
     hour_counter = Counter(hours)
-    df = pd.DataFrame(list(hour_counter.items()), columns=['hour', 'count'])
-    fig = px.bar(df, x='hour', y='count', title='Hour vs Count')
+    df = pd.DataFrame(list(hour_counter.items()), columns=["hour", "count"])
+    fig = px.bar(df, x="hour", y="count", title="Hour vs Count")
     fig.show()
 
     # Posts per day
@@ -289,8 +289,8 @@ def extras():
     parsed_postdates = [parse(postdate) for postdate in postdates[18:]]
     days = [pd.date() for pd in parsed_postdates]
     date_counter = Counter(days)
-    df = pd.DataFrame(list(date_counter.items()), columns=['date', 'count'])
-    fig = px.bar(df, x='date', y='count', title='Date vs Count')
+    df = pd.DataFrame(list(date_counter.items()), columns=["date", "count"])
+    fig = px.bar(df, x="date", y="count", title="Date vs Count")
     fig.show()
 
     #  notion_game_names = get_notion_game_list(return_feature="bgg_name")
@@ -501,20 +501,25 @@ def get_last_bid(g):
 
 
 def get_last_bidder(g):
+    poster = g.get("username")
     comments = g.find_all("comment")
     last_bidder = None
     if comments:
-        comment = comments[-1]
-        last_bidder = comment.get("username")
+        bidders_comments = [c for c in comments if c.get("username") != poster]
+        if bidders_comments:
+            comment = bidders_comments[-1]
+            last_bidder = comment.get("username")
     return last_bidder
 
 
 def get_all_bidders(g):
+    poster = g.get("username")
     comments = g.find_all("comment")
     bidders = []
     for comment in comments:
         bidder = comment.get("username")
-        bidders += [bidder]
+        if bidder != poster:
+            bidders += [bidder]
     return bidders
 
 
@@ -522,15 +527,6 @@ def check_is_available(g, available):
     is_available = int(g.get("objectid")) in available
     if not is_available:
         return True
-    #  is_crossed = "[-]" in str(g)
-    #  if is_crossed:
-    #      return True
-    #  comments = g.find_all("comment")
-    #  message_bin = False
-    #  for comment in comments:
-    #      message_bin = "BIN" in comment.text
-    #      if message_bin:
-    #          return True
     return False
 
 
