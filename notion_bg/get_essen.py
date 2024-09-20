@@ -7,7 +7,7 @@ from typing import List, Optional
 import iterfzf
 import yaml
 from boardgamegeek import BGGClient
-from dateutil.parser import parse
+from dateutil.parser import ParserError, parse
 from loguru import logger
 from pydantic import BaseModel
 
@@ -483,15 +483,18 @@ def get_notion_game_list(return_feature="bgg_id"):
 
 
 def get_last_bid(g):
+    poster = g.get("username")
     comments = g.find_all("comment")
     price = 0
     if comments:
-        comment = comments[-1]
-        comment_text = comment.text
-        really_comment_text = re.sub("\[.*?\]", "", comment_text)
-        ugly_price = re.search(r"\d+", really_comment_text)
-        if ugly_price:
-            price = int(ugly_price.group(0))
+        bidders_comments = [c for c in comments if c.get("username") != poster]
+        if bidders_comments:
+            comment = bidders_comments[-1]
+            comment_text = comment.text
+            really_comment_text = re.sub("\[.*?\]", "", comment_text)
+            ugly_price = re.search(r"\d+", really_comment_text)
+            if ugly_price:
+                price = int(ugly_price.group(0))
     if price > 1900:
         price = 0
     if not price:
@@ -543,10 +546,13 @@ def check_is_sold(g, bid, bin, has_comment, auction_end):
         message_bin = "BIN" in comment.text
         if message_bin:
             return True
-    auction_end_date = parse(auction_end)
-    # Check that the auction_end_date is before yesterday
-    if auction_end_date < datetime.now() - timedelta(days=1):
-        return True
+    try:
+        auction_end_date = parse(auction_end)
+        if auction_end_date < datetime.now() - timedelta(days=1):
+            return True
+    except ParserError:
+        pass
+
     return False
 
 
