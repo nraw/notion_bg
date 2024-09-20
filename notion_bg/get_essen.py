@@ -1,6 +1,7 @@
 import asyncio
 import re
 from collections import Counter
+from datetime import datetime, timedelta
 from typing import List, Optional
 
 import iterfzf
@@ -40,7 +41,7 @@ class Game(BaseModel):
         bgg_id = g.get("objectid")
         #  thumbnail = get_thumbnail_from_bgg(bgg, bgg_id)
         has_comment = g.find("comment") is not None
-        is_sold = check_is_sold(g, bid, bin)
+        is_sold = check_is_sold(g, bid, bin, has_comment, auction_end)
         data = dict(
             name=name,
             url=url,
@@ -270,7 +271,7 @@ def extras():
         for g in available_games
     ]
     lesgo.sort()
-    lesgo.sort(key=lambda x: x[1])
+    lesgo.sort(key=lambda x: x[2])
     print(yaml.dump(lesgo))
 
     # expansions outside the scope
@@ -530,11 +531,11 @@ def check_is_available(g, available):
     return False
 
 
-def check_is_sold(g, bid, bin):
+def check_is_sold(g, bid, bin, has_comment, auction_end):
     #  is_crossed = "[-]" in str(g)
     #  if is_crossed:
     #      return True
-    if bid == bin:
+    if bid == bin and has_comment:
         return True
     comments = g.find_all("comment")
     message_bin = False
@@ -542,6 +543,10 @@ def check_is_sold(g, bid, bin):
         message_bin = "BIN" in comment.text
         if message_bin:
             return True
+    auction_end_date = parse(auction_end)
+    # Check that the auction_end_date is before yesterday
+    if auction_end_date < datetime.now() - timedelta(days=1):
+        return True
     return False
 
 
@@ -576,6 +581,7 @@ def get_language(g):
 
 
 def check_game(all_games, essen_sales_games):
+    essen_url = "https://boardgamegeek.com/geeklist/339779/the-essen-2024-no-shipping-auction-list-post-your?itemid="
     game = iterfzf.iterfzf(all_games)
     selected_games = [g for g in essen_sales_games if g.get("objectname") == game]
     lesgo = [
