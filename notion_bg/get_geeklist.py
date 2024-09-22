@@ -23,7 +23,7 @@ def get_geeklist(geeklist_id, key="objectid", comments=False):
 
 def get_response_with_retries(geeklist_url):
     status = 0
-    max_retries = 20
+    max_retries = 25
     sleep_time = 5
     retry_count = 0
     res = None
@@ -34,4 +34,6 @@ def get_response_with_retries(geeklist_url):
         logger.info(f"{status=}")
         logger.info(f"{retry_count=}")
         retry_count += 1
+    if status != 200:
+        raise Exception(f"Failed to get response from {geeklist_url}")
     return res
