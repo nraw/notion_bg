@@ -3,9 +3,12 @@ import pandas as pd
 from boardgamegeek import BGGClient
 from tqdm import tqdm
 
+from notion_bg.essen_site import get_old_essen_games
 from notion_bg.get_my_expansions import get_my_games_list
 
-def get_sizes(my_essen_games):
+
+def get_sizes():
+    my_essen_games = get_old_essen_games()
     bgg = BGGClient()
     nraw_games_list = get_my_games_list(bgg, return_feature="bgg_id")
     games = [
@@ -17,8 +20,8 @@ def get_sizes(my_essen_games):
     games_data = games_data.reset_index()
 
     #  bought_ids = [204466, 82168, 197443, 12942, 113294, 174614, 182172, 300731, 242343]
-    bidding_ids = [game['bgg_id'] for game in my_essen_games['bidding']]
-    bought_ids = [game['bgg_id'] for game in my_essen_games['bought']]
+    bidding_ids = [game.bgg_id for game in my_essen_games["bidding"]]
+    bought_ids = [game.bgg_id for game in my_essen_games["bought"]]
     bought_ids = bought_ids + bidding_ids
     bought_games = [
         bgg.game(game_id=bgg_id, versions=True) for bgg_id in tqdm(bought_ids)
@@ -43,6 +46,7 @@ def get_sizes(my_essen_games):
     for pair in pairs:
         create_pair_report(pair)
 
+
 def create_pair_report(pair):
     width_0 = np.round(inch_to_cm(pair[0]["width"]))
     length_0 = np.round(inch_to_cm(pair[0]["length"]))
@@ -51,26 +55,17 @@ def create_pair_report(pair):
     length_1 = np.round(inch_to_cm(pair[1]["length"]))
     depth_1 = np.round(inch_to_cm(pair[1]["depth"]))
 
-    pair0size = (
-        str(width_0)
-        + "x"
-        + str(length_0)
-        + "x"
-        + str(depth_0)
-    )
-    pair1size = (
-        str(width_1)
-        + "x"
-        + str(length_1)
-        + "x"
-        + str(depth_1)
-    )
+    pair0size = str(width_0) + "x" + str(length_0) + "x" + str(depth_0)
+    pair1size = str(width_1) + "x" + str(length_1) + "x" + str(depth_1)
     print(pair[1]["game"], " - ", pair[0]["game"])
     print(pair1size, " - ", pair0size)
-    response_text = create_pair_text(width_0, length_0, depth_0, width_1, length_1, depth_1)
+    response_text = create_pair_text(
+        width_0, length_0, depth_0, width_1, length_1, depth_1
+    )
     if response_text:
         print(response_text)
     print()
+
 
 def create_pair_text(width_0, length_0, depth_0, width_1, length_1, depth_1):
     text_format = []
@@ -89,8 +84,10 @@ def create_pair_text(width_0, length_0, depth_0, width_1, length_1, depth_1):
     text_response = " ".join(text_format)
     return text_response
 
+
 def inch_to_cm(inch):
     return inch * 2.54
+
 
 def get_size(g):
     versions = g.data()["versions"]
