@@ -1,5 +1,7 @@
 # Notion BoardGames
 
+Hi
+
 ## Description
 
 Notion Background is a Python project that provides various functionalities for handling board game collections, filtering games, and processing selected games. It utilizes the Notion API to interact with a Notion database and perform tasks such as downloading collections, filtering games, and processing selected games.

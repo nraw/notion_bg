@@ -21,12 +21,12 @@ def get_notion_data(database_id, headers):
     res = requests.post(url, headers=headers)
     data = res.json()
     has_more = data["has_more"]
+    next_cursor = data["next_cursor"]
     while has_more:
-        next_cursor = data["next_cursor"]
         query_data = {"start_cursor": next_cursor}
         res = requests.post(url, headers=headers, data=json.dumps(query_data))
         new_data = res.json()
         data["results"] += new_data["results"]
         has_more = new_data["has_more"]
-
+        next_cursor = new_data["next_cursor"]
     return data
