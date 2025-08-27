@@ -12,3 +12,9 @@ run_tabletop:
 
 essen_site:
 	python3 make_site.py
+
+essen_site_2024:
+	python3 make_site.py --year 2024
+
+essen_site_2025:
+	python3 make_site.py --year 2025

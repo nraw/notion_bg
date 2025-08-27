@@ -29,9 +29,19 @@ class Game(BaseModel):
     is_sold: bool
 
     @classmethod
-    def from_g(cls, g, thumbnail=None):
-        #  essen_url = "https://boardgamegeek.com/geeklist/319184/essen-2023-no-shipping-auction-list-post-your-own?itemid="
-        essen_url = "https://boardgamegeek.com/geeklist/339779/the-essen-2024-no-shipping-auction-list-post-your?itemid="
+    def from_g(cls, g, thumbnail=None, year=None):
+        # URLs by year
+        essen_urls = {
+            2023: "https://boardgamegeek.com/geeklist/319184/essen-2023-no-shipping-auction-list-post-your-own?itemid=",
+            2024: "https://boardgamegeek.com/geeklist/339779/the-essen-2024-no-shipping-auction-list-post-your?itemid=",
+            2025: "https://boardgamegeek.com/geeklist/319165/essen-2025-no-shipping-auction-list-post-your?itemid="
+        }
+        
+        # Default to latest year if none provided
+        if year is None:
+            year = max(essen_urls.keys())
+            
+        essen_url = essen_urls.get(year, essen_urls[max(essen_urls.keys())])
         name = g.get("objectname")
         auction_end = get_auction_end(g)
         language = get_language(g)
@@ -112,9 +122,9 @@ def compose_new_game_message(new_game):
     return new_game_message
 
 
-def get_my_essen_games():
+def get_my_essen_games(year=None):
     notion_game_list = get_notion_game_list()
-    essen_sales_games, essen_sales_ids = get_essen_sales()
+    essen_sales_games, essen_sales_ids = get_essen_sales(year)
     #  nset = set(nraw_games_list)
     nset = set(notion_game_list)
     eset = set(essen_sales_ids)
@@ -124,16 +134,20 @@ def get_my_essen_games():
     # find game
     #  find_game(essen_sales_games)
 
-    my_bids, bidding, bought = get_bidding(essen_sales_games)
+    # Get the year from essen_sales_games if not provided
+    if year is None:
+        year = max([2023, 2024, 2025])
+        
+    my_bids, bidding, bought = get_bidding(essen_sales_games, year)
 
     # my past bids stuff
-    bidders, past_bidding = get_past_bidding(essen_sales_games)
+    bidders, past_bidding = get_past_bidding(essen_sales_games, year)
 
     # wishlist stuff
-    wishlisted = get_wishlisted(eset, essen_sales_games, nset, my_bids)
+    wishlisted = get_wishlisted(eset, essen_sales_games, nset, my_bids, year)
 
     # my offers
-    selling = get_selling(essen_sales_games)
+    selling = get_selling(essen_sales_games, year)
     my_essen_games = dict(
         bidding=bidding,
         past_bidding=past_bidding,
@@ -155,11 +169,11 @@ def get_thumbnail_from_bgg(bgg, game_id):
     return game.thumbnail
 
 
-def get_bidding(essen_sales_games):
+def get_bidding(essen_sales_games, year=None):
     my_bids = [g for g in essen_sales_games if (get_last_bidder(g) == "nraw")]
     #  my_bids = [g for g in my_bids if g.get("id") not in whitelist]
     #  my_bids = [g for g in my_bids if g.get("id") not in blacklist]
-    all_bidding = [Game.from_g(g) for g in my_bids]
+    all_bidding = [Game.from_g(g, year=year) for g in my_bids]
     bidding = [game for game in all_bidding if not game.is_sold]
     bought = [game for game in all_bidding if game.is_sold]
     #  bidding.sort()
@@ -203,7 +217,7 @@ def find_game(essen_sales_games):
     check_game(all_games, essen_sales_games)
 
 
-def get_past_bidding(essen_sales_games):
+def get_past_bidding(essen_sales_games, year=None):
     player = "nraw"
     my_past_bids = []
     bidders = []
@@ -212,7 +226,7 @@ def get_past_bidding(essen_sales_games):
         if bidders:
             if player in bidders[:-1] and player != bidders[-1]:
                 my_past_bids += [g]
-    past_bidding = [Game.from_g(g) for g in my_past_bids]
+    past_bidding = [Game.from_g(g, year=year) for g in my_past_bids]
     #  past_bidding.sort(key=lambda x: x[1])
     #  print(yaml.dump(past_bidding))
     return bidders, past_bidding
@@ -227,7 +241,7 @@ def get_bought(essen_sales_games, whitelist) -> List[Game]:
     return bought
 
 
-def get_wishlisted(eset, essen_sales_games, nset, my_bids) -> List[Game]:
+def get_wishlisted(eset, essen_sales_games, nset, my_bids, year=None) -> List[Game]:
     available = nset.intersection(eset)
     available_games = [
         g for g in essen_sales_games if not check_is_available(g, available)
@@ -236,7 +250,7 @@ def get_wishlisted(eset, essen_sales_games, nset, my_bids) -> List[Game]:
     not_bidding_already = [
         g for g in available_games if g.get("objectid") not in my_bids_ids
     ]
-    wishlisted = [Game.from_g(g) for g in not_bidding_already]
+    wishlisted = [Game.from_g(g, year=year) for g in not_bidding_already]
     #  wishlisted.sort()
     #  wishlisted.sort(key=lambda x: x[0])
     #  wishlisted.sort(key=lambda x: x[1])
@@ -244,9 +258,9 @@ def get_wishlisted(eset, essen_sales_games, nset, my_bids) -> List[Game]:
     return wishlisted
 
 
-def get_selling(essen_sales_games):
+def get_selling(essen_sales_games, year=None):
     my_offers = [g for g in essen_sales_games if g.get("username") == "nraw"]
-    selling = [Game.from_g(g) for g in my_offers]
+    selling = [Game.from_g(g, year=year) for g in my_offers]
     #  print(yaml.dump(selling))
     return selling
 
@@ -442,10 +456,24 @@ def get_games_info(game_ids):
     return games_info
 
 
-def get_essen_sales():
-    logger.info("Obtaining Essen sale games")
-    #  essen_geeklist_id = "319184"  # Essen
-    essen_geeklist_id = "339779"  # Essen 2024
+def get_essen_sales(year=None):
+    # Geeklist IDs by year
+    geeklist_ids = {
+        2023: "319184",
+        2024: "339779", 
+        2025: "319165"
+    }
+    
+    # Default to latest year if none provided
+    if year is None:
+        year = max(geeklist_ids.keys())
+    
+    logger.info(f"Obtaining Essen {year} sale games")
+    
+    if year not in geeklist_ids:
+        raise ValueError(f"No geeklist ID configured for year {year}")
+    
+    essen_geeklist_id = geeklist_ids[year]
     essen_sales_games = get_geeklist(essen_geeklist_id, None, comments=True)
     essen_sales_ids = [int(game.get("objectid")) for game in essen_sales_games]
     return essen_sales_games, essen_sales_ids
