@@ -22,14 +22,17 @@ def create_my_essen_site(year=None, user_name="nraw"):
     get_all_thumbnails(my_essen_games)
 
     new_essen_games = EssenGames.model_validate(my_essen_games)
-    old_essen_games = get_old_essen_games()
-    message = new_essen_games.compare_with_old(old_essen_games)
-    if message:
-        message = f"My [Essen games](https://nraw.github.io/notion_bg/essen) update:\n{message}"
-        try:
-            send_telegram(message)
-        except Exception as e:
-            logger.error(f"Error sending telegram message: {e}")
+
+    # Only send telegram notifications for nraw user
+    if user_name == "nraw":
+        old_essen_games = get_old_essen_games()
+        message = new_essen_games.compare_with_old(old_essen_games)
+        if message:
+            message = f"My [Essen games](https://nraw.github.io/notion_bg/essen) update:\n{message}"
+            try:
+                send_telegram(message)
+            except Exception as e:
+                logger.error(f"Error sending telegram message: {e}")
 
     jinja_template = Path("notion_bg/essen.html").read_text()
     template = Template(jinja_template)
@@ -70,6 +73,7 @@ def create_my_essen_site(year=None, user_name="nraw"):
     # Ensure directory exists
     Path(output_path).parent.mkdir(parents=True, exist_ok=True)
     Path(output_path).write_text(output)
+    logger.info(f"Created site {output}")
 
 
 def get_all_thumbnails(my_essen_games):

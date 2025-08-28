@@ -53,7 +53,7 @@ class Game(BaseModel):
         bgg_id = g.get("objectid")
         #  thumbnail = get_thumbnail_from_bgg(bgg, bgg_id)
         has_comment = g.find("comment") is not None
-        is_sold = check_is_sold(g, bid, bin, has_comment, auction_end)
+        is_sold = check_is_sold(g, bid, bin, has_comment, auction_end, year=year)
         data = dict(
             name=name,
             url=url,
@@ -565,7 +565,7 @@ def check_is_available(g, available):
     return False
 
 
-def check_is_sold(g, bid, bin, has_comment, auction_end):
+def check_is_sold(g, bid, bin, has_comment, auction_end, year):
     #  is_crossed = "[-]" in str(g)
     #  if is_crossed:
     #      return True
@@ -579,6 +579,7 @@ def check_is_sold(g, bid, bin, has_comment, auction_end):
             return True
     try:
         auction_end_date = parse(auction_end)
+        auction_end_date = auction_end_date.replace(year=year)
         if auction_end_date < datetime.now() - timedelta(days=1):
             return True
     except ParserError:
