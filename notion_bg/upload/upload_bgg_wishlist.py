@@ -20,9 +20,9 @@ def upload_games():
         create_bgg_game(game_id, game_data)
 
 
-def get_bgg_wishlist():
+def get_bgg_wishlist(user_name="nraw"):
     bgg = BGGClient()
-    games_batch = get_collection(bgg, user_name="nraw", wishlist=True)
+    games_batch = get_collection(bgg, user_name=user_name, wishlist=True)
     games = {game.id: game._data for game in games_batch if "id" in dir(game)}
     return games
 

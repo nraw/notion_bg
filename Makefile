@@ -18,3 +18,6 @@ essen_site_2024:
 
 essen_site_2025:
 	python3 make_site.py --year 2025
+
+essen_site_multi:
+	python3 make_site.py --user_names "nraw,user2,user3"

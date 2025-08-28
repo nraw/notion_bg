@@ -105,7 +105,7 @@
 <body class="p-8 custom-scrollbar">
 	<div class="mx-auto">
 		<h1 class="text-4xl font-bold mb-8 text-center text-white">
-			Essen {{ current_year }} Overview
+			{% if current_user != "nraw" %}{{ current_user }}'s {% endif %}Essen {{ current_year }} Overview
 		</h1>
 
 		<!-- Year Navigation -->
@@ -115,7 +115,7 @@
 				{% if year == current_year %}
 				<span class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md">{{ year }}</span>
 				{% else %}
-				<a href="{% if year == available_years|max %}./{% else %}./{{ year }}/{% endif %}essen.html" 
+				<a href="{% if year == available_years|max %}./{% if current_user != "nraw" %}{{ current_user }}_{% endif %}essen.html{% else %}./{{ year }}/{% if current_user != "nraw" %}{{ current_user }}_{% endif %}essen.html{% endif %}" 
 				   class="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-700 rounded-md transition-colors duration-200">{{ year }}</a>
 				{% endif %}
 				{% endfor %}
