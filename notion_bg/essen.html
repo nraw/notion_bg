@@ -115,7 +115,7 @@
 				{% if year == current_year %}
 				<span class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md">{{ year }}</span>
 				{% else %}
-				<a href="{% if year == available_years|max %}./{% if current_user != "nraw" %}{{ current_user }}_{% endif %}essen.html{% else %}./{{ year }}/{% if current_user != "nraw" %}{{ current_user }}_{% endif %}essen.html{% endif %}" 
+				<a href="{% if year == available_years|max %}/notion_bg/{% if current_user != "nraw" %}{{ current_user }}_{% endif %}essen.html{% else %}/notion_bg/{{ year }}/{% if current_user != "nraw" %}{{ current_user }}_{% endif %}essen.html{% endif %}" 
 				   class="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-700 rounded-md transition-colors duration-200">{{ year }}</a>
 				{% endif %}
 				{% endfor %}
