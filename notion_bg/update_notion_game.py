@@ -84,6 +84,6 @@ def get_headers():
     headers = {
         "Authorization": f"Bearer {notion_token}",
         "Content-Type": "application/json",
-        "Notion-Version": "2022-06-28",
+        "Notion-Version": "2025-09-03",
     }
     return headers

@@ -43,6 +43,21 @@ def get_missing_games(games, notion_game_list):
     return missing_games
 
 
+def get_data_source_id(database_id, headers):
+    """Get the first data_source_id for a given database_id"""
+    url = f"https://api.notion.com/v1/databases/{database_id}"
+    res = requests.get(url, headers=headers)
+    database_data = res.json()
+    
+    if 'data_sources' in database_data and len(database_data['data_sources']) > 0:
+        data_source_id = database_data['data_sources'][0]['id']
+        logger.info(f"Found data_source_id: {data_source_id} for database: {database_id}")
+        return data_source_id
+    else:
+        logger.error(f"No data sources found for database: {database_id}")
+        raise Exception(f"No data sources found for database: {database_id}")
+
+
 def create_bgg_game(game_id, game_data):
     states = [
         "Wakalaka",
@@ -59,14 +74,15 @@ def create_bgg_game(game_id, game_data):
     headers = {
         "Authorization": "Bearer " + notion_token,
         "Content-Type": "application/json",
-        "Notion-Version": "2022-06-28",
+        "Notion-Version": "2025-09-03",
     }
+    data_source_id = get_data_source_id(database_id, headers)
     players = list(range(game_data["minplayers"], game_data["maxplayers"] + 1))
     players_multi_select = [dict(name=str(p)) for p in players]
     bgg_url = "https://boardgamegeek.com/boardgame/" + str(game_id)
 
     json_data = {
-        "parent": {"database_id": database_id},
+        "parent": {"data_source_id": data_source_id},
         "properties": {
             "Name": {"title": [{"text": {"content": game_data["name"]}}]},
             "Status": {"select": {"name": state}},
