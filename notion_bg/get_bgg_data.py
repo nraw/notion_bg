@@ -58,7 +58,9 @@ def check_bgg_id(new_game_data):
 
 def get_bgg_url(new_game):
     wishlist_scanner_url = os.environ["wishlist_scanner_url"]
+    bgg_api_key = os.environ.get("BGG_API_KEY", "")
+    headers = {"Authorization": f"Bearer {bgg_api_key}"}
     url = wishlist_scanner_url + "?query=" + quote(new_game)
-    res = requests.get(url)
+    res = requests.get(url, headers=headers)
     bgg_id = res.text
     return bgg_id

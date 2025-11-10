@@ -2,11 +2,11 @@ name: make_essen_site
 
 on:
   # push:
-    # branches: [source]
+  # branches: [source]
   # pull_request:
-    # branches: [source]
+  # branches: [source]
   schedule:
-    - cron:  '0,30 7-22 * 8-9 *'
+    - cron: "0,30 7-22 * 8-9 *"
   workflow_dispatch:
   repository_dispatch:
     types:
@@ -40,6 +40,7 @@ jobs:
           google_api_key: ${{ secrets.google_api_key }}
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          BGG_API_KEY: ${{ secrets.BGG_API_KEY }}
       - name: Upload Page Artifact 🚀
         uses: actions/upload-pages-artifact@v3
         with:

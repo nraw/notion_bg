@@ -2,11 +2,11 @@ name: update_new
 
 on:
   # push:
-    # branches: [source]
+  # branches: [source]
   # pull_request:
-    # branches: [source]
+  # branches: [source]
   schedule:
-    - cron:  '0 7 * * *'
+    - cron: "0 7 * * *"
   workflow_dispatch:
   repository_dispatch:
     types:
@@ -32,4 +32,5 @@ jobs:
           notion_token: ${{ secrets.notion_token }}
           wishlist_scanner_url: ${{ secrets.wishlist_scanner_url }}
           google_api_key: ${{ secrets.google_api_key }}
+          BGG_API_KEY: ${{ secrets.BGG_API_KEY }}
           # data: ${{ toJson(github.event.client_payload.data) }}

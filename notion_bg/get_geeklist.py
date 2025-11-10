@@ -27,9 +27,12 @@ def get_response_with_retries(geeklist_url):
     sleep_time = 5
     retry_count = 0
     res = None
+
+    bgg_api_key = os.environ.get("BGG_API_KEY", "")
+    headers = {"Authorization": f"Bearer {bgg_api_key}"}
     while status != 200 and retry_count <= max_retries:
         sleep(sleep_time * retry_count)
-        res = requests.get(geeklist_url)
+        res = requests.get(geeklist_url, headers=headers)
         status = res.status_code
         logger.info(f"{status=}")
         logger.info(f"{retry_count=}")
