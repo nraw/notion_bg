@@ -1,6 +1,5 @@
 Jinja2
 PyYAML
-boardgamegeek2
 beautifulsoup4
 fire
 google-api-python-client

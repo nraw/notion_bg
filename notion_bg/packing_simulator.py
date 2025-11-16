@@ -1,8 +1,8 @@
 import numpy as np
 import pandas as pd
-from boardgamegeek import BGGClient
 from tqdm import tqdm
 
+from notion_bg.bgg_api import BGGClient
 from notion_bg.essen_site import get_old_essen_games
 from notion_bg.get_my_expansions import get_my_games_list
 

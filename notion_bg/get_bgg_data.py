@@ -3,8 +3,9 @@ from time import sleep
 from urllib.parse import quote
 
 import requests
-from boardgamegeek import BGGApiError, BGGClient, BGGItemNotFoundError
 from loguru import logger
+
+from notion_bg.bgg_api import BGGApiError, BGGClient, BGGItemNotFoundError
 
 
 def get_bgg_data(new_game, bgg_id=None):

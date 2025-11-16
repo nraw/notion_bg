@@ -1,10 +1,10 @@
 from functools import lru_cache
 
 import pandas as pd
-from boardgamegeek import BGGApiError, BGGClient
 from loguru import logger
 from tqdm import tqdm
 
+from notion_bg.bgg_api import BGGApiError, BGGClient
 from notion_bg.get_collection import get_collection
 
 

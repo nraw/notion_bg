@@ -3,12 +3,12 @@ from datetime import datetime
 from pathlib import Path
 
 import requests
-from boardgamegeek import BGGClient
 from bs4 import BeautifulSoup
 from jinja2 import Template
 from loguru import logger
 from tqdm import tqdm
 
+from notion_bg.bgg_api import BGGClient
 from notion_bg.get_essen import EssenGames, get_my_essen_games, get_thumbnails
 from notion_bg.send_telegram import send_telegram
 

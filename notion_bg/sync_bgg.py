@@ -1,7 +1,6 @@
 from collections import defaultdict
 
-from boardgamegeek import BGGClient
-
+from notion_bg.bgg_api import BGGClient
 from notion_bg.get_collection import get_collection
 from notion_bg.get_notion_games import get_notion_games
 

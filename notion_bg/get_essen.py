@@ -7,11 +7,11 @@ from typing import List, Optional
 
 import iterfzf
 import yaml
-from boardgamegeek import BGGClient
 from dateutil.parser import ParserError, parse
 from loguru import logger
 from pydantic import BaseModel
 
+from notion_bg.bgg_api import BGGClient
 from notion_bg.get_geeklist import get_geeklist
 from notion_bg.get_my_expansions import get_my_expansions, get_my_games_list
 from notion_bg.get_notion_games import get_notion_games

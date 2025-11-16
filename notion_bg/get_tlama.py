@@ -2,10 +2,10 @@ import re
 from time import sleep
 
 import requests
-from boardgamegeek import BGGApiError, BGGClient
 from bs4 import BeautifulSoup
 from loguru import logger
 
+from notion_bg.bgg_api import BGGApiError, BGGClient
 from notion_bg.config import conf
 from notion_bg.get_collection import get_collection
 
