@@ -7,7 +7,7 @@ from loguru import logger
 
 
 def get_geeklist(geeklist_id, key="objectid", comments=False):
-    geeklist_url = f"https://www.boardgamegeek.com/xmlapi/geeklist/{geeklist_id}"
+    geeklist_url = f"https://boardgamegeek.com/xmlapi/geeklist/{geeklist_id}"
     if comments:
         geeklist_url += "?comments=1"
 
