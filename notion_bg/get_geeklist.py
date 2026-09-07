@@ -25,14 +25,14 @@ def get_geeklist(geeklist_id, key="objectid", comments=False):
 def get_response_with_retries(geeklist_url):
     status = 0
     max_retries = 25
-    base_sleep_time = 1  # Start with 1 second
+    base_sleep_time = 10  # Start with 10 seconds
     retry_count = 0
     res = None
 
     bgg_api_key = os.environ.get("BGG_API_KEY", "")
     headers = {"Authorization": f"Bearer {bgg_api_key}"}
     while status != 200 and retry_count <= max_retries:
-        # Exponential backoff: 1s, 2s, 4s, 8s, 16s, etc.
+        # Exponential backoff: 10s, 20s, 40s, 80s, 160s, etc.
         wait_time = base_sleep_time * (2 ** retry_count)
         if retry_count > 0:
             logger.info(f"Retry attempt {retry_count}/{max_retries}, waiting {wait_time}s before retry")
