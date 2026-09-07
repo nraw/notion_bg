@@ -38,13 +38,13 @@ def create_my_essen_site(year=None, user_name="nraw"):
     template = Template(jinja_template)
     # Determine current year from data or default to latest
     if year is None:
-        year = max([2023, 2024, 2025])  # Default to latest supported year
+        year = max([2023, 2024, 2025, 2026])  # Default to latest supported year
 
     timestamp = datetime.now()
     data_json = new_essen_games.model_dump_json()
 
     # Available years for navigation
-    available_years = [2023, 2024, 2025]
+    available_years = [2023, 2024, 2025, 2026]
 
     output = template.render(
         my_essen_games=my_essen_games,
