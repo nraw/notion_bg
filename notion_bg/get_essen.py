@@ -37,6 +37,7 @@ class Game(BaseModel):
             2023: "https://boardgamegeek.com/geeklist/319184/essen-2023-no-shipping-auction-list-post-your-own?itemid=",
             2024: "https://boardgamegeek.com/geeklist/339779/the-essen-2024-no-shipping-auction-list-post-your?itemid=",
             2025: "https://boardgamegeek.com/geeklist/319165/essen-2025-no-shipping-auction-list-post-your?itemid=",
+            2026: "https://boardgamegeek.com/geeklist/382717/the-essen-2026-no-shipping-auction-list-post-your?itemid=",
         }
 
         # Default to latest year if none provided
@@ -142,7 +143,7 @@ def get_my_essen_games(year=None, user_name="nraw"):
 
     # Get the year from essen_sales_games if not provided
     if year is None:
-        year = max([2023, 2024, 2025])
+        year = max([2023, 2024, 2025, 2026])
 
     my_bids, bidding, bought = get_bidding(essen_sales_games, year, user_name)
 
@@ -465,7 +466,7 @@ def get_games_info(game_ids):
 @lru_cache
 def get_essen_sales(year=None):
     # Geeklist IDs by year
-    geeklist_ids = {2023: "319184", 2024: "339779", 2025: "319165"}
+    geeklist_ids = {2023: "319184", 2024: "339779", 2025: "319165", 2026: "382717"}
 
     # Default to latest year if none provided
     if year is None:
